@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b5dbb">
+<title>かぶくらべーる</title>
+<style>
+:root{--b:#0b5dbb;--bg:#eef5fb;--c:#fff;--t:#17324d;--m:#6b7c8f;--g:#16834f;--r:#c33}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--t)}
+header{background:linear-gradient(90deg,#0d3158,#0b5dbb);color:white;padding:18px 22px;position:sticky;top:0}
+h1{margin:0;font-size:24px}main{padding:16px;max-width:1200px;margin:auto}
+.card{background:var(--c);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 8px 24px #17324d14}
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+label{font-size:12px;font-weight:700;color:#456}input,select{width:100%;padding:10px;border:1px solid #cfdce8;border-radius:10px;background:white}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:880px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap}th{background:#f5f8fb;font-size:12px}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2){text-align:left}
+.pos{color:var(--g);font-weight:800}.neg{color:var(--r);font-weight:800}.pill{font-weight:800;background:#e8f6ef;color:#176a4c;border-radius:999px;padding:3px 8px}
+small{color:var(--m)}
+@media(max-width:760px){.filters{grid-template-columns:1fr 1fr}main{padding:10px}h1{font-size:21px}}
+</style>
+</head>
+<body>
+<header><h1>かぶくらべーる</h1><div>比較して、見えてくる</div></header>
+<main>
+<div class="card">
+  <b>iPad動作確認版</b><br><small>この画面で10社が表示されれば、iPad側の問題は「ローカルHTML」だったと切り分けできます。</small>
+</div>
+<div class="card filters">
+ <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
+ <div><label>期待利回り 最低(%)</label><input id="ret" type="number" value="-100"></div>
+ <div><label>営業利益率 最低(%)</label><input id="mar" type="number" value="0"></div>
+ <div><label>業種</label><select id="sec"><option value="">すべて</option></select></div>
+</div>
+<div class="card tablewrap">
+<table><thead><tr><th>銘柄</th><th>業種</th><th>期待利回り</th><th>営業利益率</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>NC(億円)</th><th>適合度</th></tr></thead><tbody id="body"></tbody></table>
+</div>
+<div class="card"><b id="count"></b><br><small>データはこのHTML内に埋め込み。外部ライブラリ・Excel読込・localStorageは使っていません。</small></div>
+</main>
+<script>
+const D=[
+["6432","竹内製作所","機械",37.6,16.43,12.89,1.79,15.97,562, "○"],
+["9735","セコム","サービス業",-34.9,12.47,24.51,1.97,8.72,3379,"○"],
+["5108","ブリヂストン","ゴム製品",-14.0,9.88,13.86,1.23,8.85,-1132,"○"],
+["5101","横浜ゴム","ゴム製品",5.3,12.92,9.17,0.96,10.95,-4284,"○"],
+["1801","大成建設","建設業",-37.0,7.45,13.62,2.20,18.74,-1905,"○"],
+["1802","大林組","建設業",-25.3,6.37,13.50,1.70,14.38,720,"○"],
+["1803","清水建設","建設業",-56.8,5.43,9.68,1.58,13.78,-2129,"○"],
+["1812","鹿島","建設業",-48.1,6.67,13.61,1.68,13.27,-4409,"○"],
+["2914","JT","食料品",-36.9,21.03,18.98,2.78,12.99,-8476,"○"],
+["6965","浜松ホトニクス","電気機器",-64.9,10.73,37.63,2.05,4.35,150,"○"]
+];
+const q=document.getElementById("q"),ret=document.getElementById("ret"),mar=document.getElementById("mar"),sec=document.getElementById("sec"),body=document.getElementById("body"),count=document.getElementById("count");
+[...new Set(D.map(x=>x[2]))].sort().forEach(s=>sec.insertAdjacentHTML("beforeend",'<option>'+s+'</option>'));
+function render(){
+ const s=q.value.trim().toLowerCase(),r=+ret.value||-999,m=+mar.value||-999;
+ const rows=D.filter(x=>(!s||x[0].includes(s)||x[1].toLowerCase().includes(s))&&x[3]>=r&&x[4]>=m&&(!sec.value||x[2]===sec.value));
+ body.innerHTML=rows.map(x=>'<tr><td><b>'+x[1]+'</b><br><small>'+x[0]+'</small></td><td>'+x[2]+'</td><td class="'+(x[3]>=0?'pos':'neg')+'">'+x[3].toFixed(1)+'%</td><td>'+x[4].toFixed(2)+'%</td><td>'+x[5].toFixed(2)+'</td><td>'+x[6].toFixed(2)+'</td><td>'+x[7].toFixed(2)+'%</td><td>'+x[8].toLocaleString()+'</td><td><span class="pill">'+x[9]+'</span></td></tr>').join('');
+ count.textContent='表示 '+rows.length+' / 10 銘柄';
+}
+[q,ret,mar,sec].forEach(e=>e.addEventListener("input",render));render();
+</script>
+</body></html>
