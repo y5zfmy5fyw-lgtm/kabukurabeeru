@@ -19,7 +19,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 .grid2{display:grid;grid-template-columns:1fr 360px;gap:16px}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.summary div{border:1px solid var(--line);border-radius:12px;padding:12px}.summary b{font-size:22px}
 .selchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.chip{background:#e8f2fb;padding:8px 11px;border-radius:999px;font-weight:700}
 .comparegrid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}.bars{display:flex;align-items:flex-end;gap:14px;height:300px;padding:20px 10px 0;border-bottom:1px solid var(--line)}.barcol{flex:1;text-align:center;min-width:55px}.vbar{width:72%;margin:auto;background:linear-gradient(180deg,#4aa1ec,#0b5dbb);border-radius:8px 8px 0 0;min-height:4px}.barlabel{font-size:11px;margin-top:7px}.metricrow{display:grid;grid-template-columns:180px repeat(5,1fr);gap:1px;background:var(--line);margin-bottom:1px}.metricrow>div{background:#fff;padding:10px;text-align:right}.metricrow>div:first-child{text-align:left;font-weight:700}
-.trendgrid{display:grid;grid-template-columns:1fr 340px;gap:16px}.trendbox{height:320px;display:flex;align-items:center;justify-content:center;color:var(--m);border:1px dashed #9eb5c9;border-radius:12px}
+.trendgrid{display:grid;grid-template-columns:1fr 340px;gap:16px}.trendchart{height:330px;border:1px solid var(--line);border-radius:12px;background:#fbfdff;overflow:hidden}.trendchart svg{width:100%;height:100%;display:block}.histitem{padding:9px 0;border-bottom:1px solid #edf2f6;font-size:13px}.histitem:last-child{border-bottom:0}
 .notice{background:#fff7dc;border:1px solid #ecd58a;color:#6d5600;padding:12px;border-radius:12px}
 .importbox{border:2px dashed #9eb5c9;border-radius:16px;padding:22px;text-align:center;background:#f8fbfe}
 .importbox input[type=file]{max-width:520px;margin:12px auto}
@@ -42,7 +42,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v0.3</b><br><small>一覧・絞り込み・比較グラフに加え、CSVから銘柄データを追加・更新できます。</small></div>
+<div class="card"><b>iPad対応MVP v0.4</b><br><small>CSV取込ごとの履歴を保存し、期待利回りなどの推移をグラフで確認できます。</small></div>
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
 <div><label>期待利回り 最低(%)</label><input id="ret" type="number" value="-100"></div>
@@ -78,10 +78,27 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </section>
 
 <section id="trend" class="page">
-<div class="card"><h2 style="margin-top:0">推移</h2><label>銘柄</label><select id="trendSel"></select></div>
+<div class="card">
+<h2 style="margin-top:0">推移</h2>
+<div class="filters" style="grid-template-columns:2fr 1fr">
+<div><label>銘柄</label><select id="trendSel"></select></div>
+<div><label>指標</label><select id="trendMetric">
+<option value="ret">期待利回り</option>
+<option value="mar">営業利益率</option>
+<option value="per">予想PER</option>
+<option value="pbr">PBR</option>
+<option value="roe">ROE</option>
+<option value="nc">ネットキャッシュ</option>
+</select></div>
+</div>
+</div>
 <div class="trendgrid">
-<div class="card"><h3>期待利回りの推移</h3><div class="trendbox">現時点では1回分のデータのみ。<br>次回更新から折れ線グラフ化します。</div></div>
-<div class="card"><h3>現在値</h3><div id="trendInfo"></div></div>
+<div class="card">
+<h3 id="trendTitle">期待利回りの推移</h3>
+<div id="trendChart" class="trendchart"></div>
+<div id="trendMeta" style="margin-top:10px"></div>
+</div>
+<div class="card"><h3>現在値</h3><div id="trendInfo"></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3>履歴</h3><div id="historyList"></div></div>
 </div>
 </section>
 
@@ -117,7 +134,16 @@ const INITIAL=[
 {code:"2914",name:"JT",sec:"食料品",ret:-36.9,mar:21.03,per:18.98,pbr:2.78,roe:12.99,nc:-8476,fit:"○"},
 {code:"6965",name:"浜松ホトニクス",sec:"電気機器",ret:-64.9,mar:10.73,per:37.63,pbr:2.05,roe:4.35,nc:150,fit:"○"}];
 let D=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_data")||"null");return Array.isArray(v)&&v.length?v:INITIAL.map(x=>({...x}))}catch(e){return INITIAL.map(x=>({...x}))}})();
+let HISTORY=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_history")||"{}");return v&&typeof v==="object"?v:{}}catch(e){return {}}})();
 const $=id=>document.getElementById(id), tabs=[...document.querySelectorAll("[data-p]")], selected=new Set();
+function stampLabel(d=new Date()){return d.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}
+function snapshotItem(x,stamp,label){return {stamp,label,ret:x.ret,mar:x.mar,per:x.per,pbr:x.pbr,roe:x.roe,nc:x.nc,mcap:x.mcap||0}}
+function ensureInitialHistory(){
+ let changed=false, now=new Date(), stamp=now.toISOString(), label=stampLabel(now);
+ D.forEach(x=>{if(!Array.isArray(HISTORY[x.code])||!HISTORY[x.code].length){HISTORY[x.code]=[snapshotItem(x,stamp,label)];changed=true}});
+ if(changed)localStorage.setItem("kabukurabeeru_history",JSON.stringify(HISTORY));
+}
+ensureInitialHistory();
 function refreshSelectors(){
  const currentSec=$("sec").value, currentTrend=$("trendSel").value;
  $("sec").innerHTML='<option value="">すべて</option>'+[...new Set(D.map(x=>x.sec))].sort().map(v=>'<option>'+v+'</option>').join("");
@@ -184,8 +210,13 @@ $("importBtn").onclick=async()=>{
    };
    const p=D.findIndex(x=>x.code===code);
    if(p>=0){D[p]={...D[p],...item};updated++} else {D.push(item);added++}
+   const now=new Date(), stamp=now.toISOString(), label=stampLabel(now);
+   if(!Array.isArray(HISTORY[code])) HISTORY[code]=[];
+   HISTORY[code].push(snapshotItem(item,stamp,label));
+   if(HISTORY[code].length>100) HISTORY[code]=HISTORY[code].slice(-100);
   });
   localStorage.setItem("kabukurabeeru_data",JSON.stringify(D));
+  localStorage.setItem("kabukurabeeru_history",JSON.stringify(HISTORY));
   selected.clear(); refreshSelectors(); render(); renderTrend();
   st.className="status ok";
   st.innerHTML="<b>取込完了</b><br>追加 "+added+"社 / 更新 "+updated+"社 / 登録合計 "+D.length+"社";
@@ -193,8 +224,8 @@ $("importBtn").onclick=async()=>{
 };
 $("resetData").onclick=()=>{
  if(!confirm("CSVで追加・更新したデータを消して、初期10社に戻しますか？")) return;
- D=INITIAL.map(x=>({...x})); localStorage.removeItem("kabukurabeeru_data"); selected.clear();
- refreshSelectors(); render(); renderTrend();
+ D=INITIAL.map(x=>({...x})); HISTORY={}; localStorage.removeItem("kabukurabeeru_data"); localStorage.removeItem("kabukurabeeru_history"); selected.clear();
+ ensureInitialHistory(); refreshSelectors(); render(); renderTrend();
  $("importStatus").className="status"; $("importStatus").textContent="初期10社に戻しました。";
 };
 
@@ -203,7 +234,30 @@ const metrics=[["期待利回り","ret","%"],["営業利益率","mar","%"],["予
 $("ctable").innerHTML=metrics.map(m=>"<div class='metricrow'><div>"+m[0]+"</div>"+A.map(x=>"<div>"+(m[2]==="%"?x[m[1]].toFixed(1)+"%":x[m[1]].toLocaleString()+m[2])+"</div>").join("")+"</div>").join("");
 const key=$("metric").value, max=Math.max(...A.map(x=>Math.abs(x[key])),1);$("bars").innerHTML=A.map(x=>"<div class='barcol'><div>"+(key==="ret"||key==="mar"||key==="roe"?x[key].toFixed(1)+"%":x[key].toLocaleString())+"</div><div class='vbar' style='height:"+Math.max(4,Math.abs(x[key])/max*210)+"px;opacity:"+(x[key]<0?.45:1)+"'></div><div class='barlabel'>"+x.name+"</div></div>").join("")}
 $("trendSel").onchange=renderTrend;
-function renderTrend(){const x=D.find(v=>v.code===$("trendSel").value)||D[0];$("trendInfo").innerHTML="<p><b>"+x.name+"</b> <small>"+x.code+"</small></p><p>期待利回り <span class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</span></p><p>営業利益率 "+x.mar.toFixed(2)+"%</p><p>PER "+x.per.toFixed(2)+"倍 / PBR "+x.pbr.toFixed(2)+"倍</p><p>ROE "+x.roe.toFixed(2)+"%</p>"}
+$("trendMetric").onchange=renderTrend;
+function metricDef(k){return {ret:["期待利回り","%"],mar:["営業利益率","%"],per:["予想PER","倍"],pbr:["PBR","倍"],roe:["ROE","%"],nc:["ネットキャッシュ","億円"]}[k]}
+function fmtMetric(k,v){if(k==="nc")return Number(v).toLocaleString()+"億円";if(k==="per"||k==="pbr")return Number(v).toFixed(2)+"倍";return Number(v).toFixed(1)+"%"}
+function trendSVG(points,key){
+ const W=760,H=300,L=54,R=20,T=24,B=44, vals=points.map(p=>Number(p[key])).filter(Number.isFinite);
+ if(!vals.length)return '<div style="padding:30px;color:var(--m)">履歴データがありません。</div>';
+ let min=Math.min(...vals), max=Math.max(...vals); if(min===max){const pad=Math.max(Math.abs(min)*.1,1);min-=pad;max+=pad}else{const pad=(max-min)*.15;min-=pad;max+=pad}
+ const X=i=>points.length===1?(L+(W-R))/2:L+i*((W-R-L)/(points.length-1));
+ const Y=v=>T+(max-v)*(H-T-B)/(max-min);
+ const ticks=[0,.25,.5,.75,1].map(t=>({v:min+(max-min)*t,y:Y(min+(max-min)*t)}));
+ const grid=ticks.map(t=>'<line x1="'+L+'" y1="'+t.y+'" x2="'+(W-R)+'" y2="'+t.y+'" stroke="#e6edf4"/><text x="'+(L-8)+'" y="'+(t.y+4)+'" text-anchor="end" font-size="11" fill="#6b7c8f">'+(key==="nc"?Math.round(t.v).toLocaleString():t.v.toFixed(1))+'</text>').join("");
+ const poly=points.length>1?'<polyline fill="none" stroke="#0b5dbb" stroke-width="3" points="'+points.map((p,i)=>X(i)+","+Y(Number(p[key]))).join(" ")+'"/>':"";
+ const dots=points.map((p,i)=>'<circle cx="'+X(i)+'" cy="'+Y(Number(p[key]))+'" r="5" fill="#0b5dbb"/><text x="'+X(i)+'" y="'+(Y(Number(p[key]))-10)+'" text-anchor="middle" font-size="11" fill="#17324d">'+fmtMetric(key,p[key]).replace("億円","").replace("倍","").replace("%","")+'</text>').join("");
+ const labels=points.map((p,i)=>'<text x="'+X(i)+'" y="'+(H-16)+'" text-anchor="middle" font-size="10" fill="#6b7c8f">'+p.label+'</text>').join("");
+ return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+'<line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="#aebdca"/>'+poly+dots+labels+'</svg>';
+}
+function renderTrend(){
+ const x=D.find(v=>v.code===$("trendSel").value)||D[0], key=$("trendMetric").value||"ret", def=metricDef(key), hist=Array.isArray(HISTORY[x.code])?HISTORY[x.code]:[];
+ $("trendTitle").textContent=def[0]+"の推移";
+ $("trendChart").innerHTML=trendSVG(hist,key);
+ $("trendMeta").innerHTML="<small>保存履歴 "+hist.length+"件。CSVを読み込むたびに、その時点の値を追加保存します。</small>";
+ $("trendInfo").innerHTML="<p><b>"+x.name+"</b> <small>"+x.code+"</small></p><p>期待利回り <span class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</span></p><p>営業利益率 "+x.mar.toFixed(2)+"%</p><p>PER "+x.per.toFixed(2)+"倍 / PBR "+x.pbr.toFixed(2)+"倍</p><p>ROE "+x.roe.toFixed(2)+"%</p><p>ネットキャッシュ "+x.nc.toLocaleString()+"億円</p>";
+ $("historyList").innerHTML=hist.length?hist.slice().reverse().slice(0,10).map(h=>"<div class='histitem'><b>"+h.label+"</b><br>"+def[0]+" "+fmtMetric(key,h[key])+"</div>").join(""):"<small>履歴なし</small>";
+}
 render();renderTrend();
 </script>
 </body></html>
