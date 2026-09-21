@@ -13,7 +13,13 @@ h1{margin:0;font-size:24px}.tabs{display:flex;gap:8px;margin-top:12px}.tabs butt
 main{padding:16px;max-width:1280px;margin:auto}.page{display:none}.page.on{display:block}
 .card{background:var(--c);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 8px 24px #17324d14}
 .filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}label{font-size:12px;font-weight:700;color:#456;display:block;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid #cfdce8;border-radius:10px;background:#fff}
-.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap}th{background:#f5f8fb;font-size:12px}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1240px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap;background:#fff}th{background:#f5f8fb;font-size:12px;position:sticky;top:0;z-index:3}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
+th:nth-child(1),td:nth-child(1){position:sticky;left:0;z-index:5;min-width:58px}
+th:nth-child(2),td:nth-child(2){position:sticky;left:58px;z-index:4;min-width:150px}
+th:nth-child(1),th:nth-child(2){background:#f5f8fb}
+td:nth-child(1),td:nth-child(2){background:#fff}
+th:nth-child(2),td:nth-child(2){box-shadow:8px 0 10px -10px rgba(23,50,77,.45)}
+.fithelp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.fitcard{border:1px solid var(--line);border-radius:12px;padding:12px}.fitcard b{display:block;margin-bottom:4px}
 .pos{color:var(--g);font-weight:800}.neg{color:var(--r);font-weight:800}.pill{font-weight:800;background:#e8f6ef;color:#176a4c;border-radius:999px;padding:3px 8px}
 small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;background:var(--b);color:#fff;font-weight:700}.btn.secondary{background:#e7f0f9;color:#174f81}
 .grid2{display:grid;grid-template-columns:1fr 360px;gap:16px}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.summary div{border:1px solid var(--line);border-radius:12px;padding:12px}.summary b{font-size:22px}
@@ -43,7 +49,16 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v0.6</b><br><small>一般指標を先に、かぶみーる独自指標を後ろに配置。企業価値ギャップと企業価値換算株価を自動計算します。</small></div>
+<div class="card"><b>iPad対応MVP v0.7</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small></div>
+<div class="card">
+<h3 style="margin-top:0">かぶみーる適合度</h3>
+<small>この指標は「評価の正しさ」ではなく、現在の計算モデルをその企業にそのまま当てはめやすいかを示します。</small>
+<div class="fithelp">
+<div class="fitcard"><b>○ 標準</b><small>一般的な事業会社。営業利益・現金・有利子負債を使った比較がしやすい。</small></div>
+<div class="fitcard"><b>△ 特殊</b><small>持株会社・投資会社など。保有資産や事業構造の影響が大きく、補足確認が必要。</small></div>
+<div class="fitcard"><b>× 対象外寄り</b><small>銀行・保険など。負債が本業の資金調達そのもので、現行モデルとの相性が悪い。</small></div>
+</div>
+</div>
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
 <div><label>予想PER 上限</label><input id="per" type="number" placeholder="指定なし"></div>
