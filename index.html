@@ -117,7 +117,10 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
   <h3>今回のCSV列</h3>
   <div class="codebox">code, name, sector, market_cap_oku, expected_return_pct, op_margin_3y_pct, forecast_per, pbr, roe_pct, net_cash_oku, fit</div>
   <p><small>CSVはUTF-8推奨。今回作成したテストCSVをそのまま利用できます。</small></p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+  <button class="btn secondary" id="resetHistory">履歴だけリセット</button>
   <button class="btn secondary" id="resetData">初期10社に戻す</button>
+  </div>
 </div>
 </section>
 </main>
@@ -221,6 +224,16 @@ $("importBtn").onclick=async()=>{
   st.className="status ok";
   st.innerHTML="<b>取込完了</b><br>追加 "+added+"社 / 更新 "+updated+"社 / 登録合計 "+D.length+"社";
  }catch(e){st.className="status err";st.textContent="読み込みエラー: "+e.message}
+};
+$("resetHistory").onclick=()=>{
+ if(!confirm("現在の銘柄データは残したまま、保存履歴だけリセットしますか？")) return;
+ HISTORY={};
+ const now=new Date(), stamp=now.toISOString(), label=stampLabel(now);
+ D.forEach(x=>{HISTORY[x.code]=[snapshotItem(x,stamp,label)]});
+ localStorage.setItem("kabukurabeeru_history",JSON.stringify(HISTORY));
+ renderTrend();
+ $("importStatus").className="status ok";
+ $("importStatus").textContent="履歴だけリセットしました。現在値を新しい起点として1件保存しています。";
 };
 $("resetData").onclick=()=>{
  if(!confirm("CSVで追加・更新したデータを消して、初期10社に戻しますか？")) return;
