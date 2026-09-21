@@ -21,6 +21,11 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 .comparegrid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}.bars{display:flex;align-items:flex-end;gap:14px;height:300px;padding:20px 10px 0;border-bottom:1px solid var(--line)}.barcol{flex:1;text-align:center;min-width:55px}.vbar{width:72%;margin:auto;background:linear-gradient(180deg,#4aa1ec,#0b5dbb);border-radius:8px 8px 0 0;min-height:4px}.barlabel{font-size:11px;margin-top:7px}.metricrow{display:grid;grid-template-columns:180px repeat(5,1fr);gap:1px;background:var(--line);margin-bottom:1px}.metricrow>div{background:#fff;padding:10px;text-align:right}.metricrow>div:first-child{text-align:left;font-weight:700}
 .trendgrid{display:grid;grid-template-columns:1fr 340px;gap:16px}.trendbox{height:320px;display:flex;align-items:center;justify-content:center;color:var(--m);border:1px dashed #9eb5c9;border-radius:12px}
 .notice{background:#fff7dc;border:1px solid #ecd58a;color:#6d5600;padding:12px;border-radius:12px}
+.importbox{border:2px dashed #9eb5c9;border-radius:16px;padding:22px;text-align:center;background:#f8fbfe}
+.importbox input[type=file]{max-width:520px;margin:12px auto}
+.status{margin-top:14px;padding:12px;border-radius:12px;background:#eef5fb;line-height:1.7}
+.status.ok{background:#e8f6ef;color:#176a4c}.status.err{background:#fdecec;color:#9a2e2e}
+.codebox{overflow:auto;background:#f5f8fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px}
 @media(max-width:900px){.filters{grid-template-columns:repeat(3,1fr)}.grid2,.comparegrid,.trendgrid{grid-template-columns:1fr}}
 @media(max-width:640px){.filters{grid-template-columns:1fr 1fr}main{padding:10px}.tabs{overflow:auto}.tabs button{white-space:nowrap}}
 </style>
@@ -32,11 +37,12 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <button class="on" data-p="list">一覧</button>
 <button data-p="compare">比較</button>
 <button data-p="trend">推移</button>
+<button data-p="import">取込</button>
 </div>
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v0.2</b><br><small>一覧・絞り込み・2〜10社比較・比較グラフまで、外部ライブラリなしで動作します。</small></div>
+<div class="card"><b>iPad対応MVP v0.3</b><br><small>一覧・絞り込み・比較グラフに加え、CSVから銘柄データを追加・更新できます。</small></div>
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
 <div><label>期待利回り 最低(%)</label><input id="ret" type="number" value="-100"></div>
@@ -78,9 +84,28 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <div class="card"><h3>現在値</h3><div id="trendInfo"></div></div>
 </div>
 </section>
+
+<section id="import" class="page">
+<div class="card">
+  <h2 style="margin-top:0">CSV取込</h2>
+  <p>「かぶみーる」から出力したCSVを読み込み、同じ証券コードは更新、新しい証券コードは追加します。</p>
+  <div class="importbox">
+    <b>CSVファイルを選択</b>
+    <input id="csvFile" type="file" accept=".csv,text/csv">
+    <button class="btn" id="importBtn">CSVを読み込む</button>
+    <div id="importStatus" class="status">まだファイルは読み込まれていません。</div>
+  </div>
+</div>
+<div class="card">
+  <h3>今回のCSV列</h3>
+  <div class="codebox">code, name, sector, market_cap_oku, expected_return_pct, op_margin_3y_pct, forecast_per, pbr, roe_pct, net_cash_oku, fit</div>
+  <p><small>CSVはUTF-8推奨。今回作成したテストCSVをそのまま利用できます。</small></p>
+  <button class="btn secondary" id="resetData">初期10社に戻す</button>
+</div>
+</section>
 </main>
 <script>
-const D=[
+const INITIAL=[
 {code:"6432",name:"竹内製作所",sec:"機械",ret:37.6,mar:16.43,per:12.89,pbr:1.79,roe:15.97,nc:562,fit:"○"},
 {code:"9735",name:"セコム",sec:"サービス業",ret:-34.9,mar:12.47,per:24.51,pbr:1.97,roe:8.72,nc:3379,fit:"○"},
 {code:"5108",name:"ブリヂストン",sec:"ゴム製品",ret:-14.0,mar:9.88,per:13.86,pbr:1.23,roe:8.85,nc:-1132,fit:"○"},
@@ -91,16 +116,88 @@ const D=[
 {code:"1812",name:"鹿島",sec:"建設業",ret:-48.1,mar:6.67,per:13.61,pbr:1.68,roe:13.27,nc:-4409,fit:"○"},
 {code:"2914",name:"JT",sec:"食料品",ret:-36.9,mar:21.03,per:18.98,pbr:2.78,roe:12.99,nc:-8476,fit:"○"},
 {code:"6965",name:"浜松ホトニクス",sec:"電気機器",ret:-64.9,mar:10.73,per:37.63,pbr:2.05,roe:4.35,nc:150,fit:"○"}];
+let D=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_data")||"null");return Array.isArray(v)&&v.length?v:INITIAL.map(x=>({...x}))}catch(e){return INITIAL.map(x=>({...x}))}})();
 const $=id=>document.getElementById(id), tabs=[...document.querySelectorAll("[data-p]")], selected=new Set();
-[...new Set(D.map(x=>x.sec))].sort().forEach(s=>$("sec").insertAdjacentHTML("beforeend","<option>"+s+"</option>"));
-$("trendSel").innerHTML=D.map(x=>"<option value='"+x.code+"'>"+x.name+" ("+x.code+")</option>").join("");
+function refreshSelectors(){
+ const currentSec=$("sec").value, currentTrend=$("trendSel").value;
+ $("sec").innerHTML='<option value="">すべて</option>'+[...new Set(D.map(x=>x.sec))].sort().map(v=>'<option>'+v+'</option>').join("");
+ if([...$("sec").options].some(o=>o.value===currentSec)) $("sec").value=currentSec;
+ $("trendSel").innerHTML=D.map(x=>"<option value='"+x.code+"'>"+x.name+" ("+x.code+")</option>").join("");
+ if([...$("trendSel").options].some(o=>o.value===currentTrend)) $("trendSel").value=currentTrend;
+ $("allc").textContent=D.length;
+}
+refreshSelectors();
 tabs.forEach(b=>b.onclick=()=>show(b.dataset.p));
 function show(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));$(p).classList.add("on");tabs.forEach(x=>x.classList.toggle("on",x.dataset.p===p));if(p==="compare")renderCompare();if(p==="trend")renderTrend()}
 ["q","ret","mar","per","roe","sec"].forEach(id=>$(id).addEventListener("input",render));
 function filtered(){const q=$("q").value.toLowerCase(),ret=+$("ret").value||-999,mar=+$("mar").value||-999,per=$("per").value===""?999:+$("per").value,roe=$("roe").value===""?-999:+$("roe").value,sec=$("sec").value;return D.filter(x=>(!q||x.name.toLowerCase().includes(q)||x.code.includes(q))&&x.ret>=ret&&x.mar>=mar&&x.per<=per&&x.roe>=roe&&(!sec||x.sec===sec))}
-function render(){const rows=filtered();$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</td><td>"+x.mar.toFixed(2)+"%</td><td>"+x.per.toFixed(2)+"</td><td>"+x.pbr.toFixed(2)+"</td><td>"+x.roe.toFixed(2)+"%</td><td>"+x.nc.toLocaleString()+"</td><td><span class='pill'>"+x.fit+"</span></td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;$("avgr").textContent=rows.length?(rows.reduce((a,x)=>a+x.ret,0)/rows.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
+function render(){const rows=filtered();$("allc").textContent=D.length;$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</td><td>"+x.mar.toFixed(2)+"%</td><td>"+x.per.toFixed(2)+"</td><td>"+x.pbr.toFixed(2)+"</td><td>"+x.roe.toFixed(2)+"%</td><td>"+x.nc.toLocaleString()+"</td><td><span class='pill'>"+x.fit+"</span></td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;$("avgr").textContent=rows.length?(rows.reduce((a,x)=>a+x.ret,0)/rows.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
 $("cmp").onclick=()=>{if(selected.size<2){alert("2社以上選択してください");return}show("compare")};
 $("metric").onchange=renderCompare;
+
+function parseCSV(text){
+ text=text.replace(/^\uFEFF/,"");
+ const rows=[]; let row=[], field="", quote=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i], n=text[i+1];
+  if(quote){
+   if(c==='"'&&n==='"'){field+='"';i++}
+   else if(c==='"') quote=false;
+   else field+=c;
+  }else{
+   if(c==='"') quote=true;
+   else if(c===','){row.push(field);field=""}
+   else if(c==='\n'){row.push(field.replace(/\r$/,""));rows.push(row);row=[];field=""}
+   else field+=c;
+  }
+ }
+ if(field!==""||row.length){row.push(field.replace(/\r$/,""));rows.push(row)}
+ return rows.filter(r=>r.some(v=>v!==""));
+}
+function n(v){const x=Number(String(v??"").replace(/,/g,""));return Number.isFinite(x)?x:0}
+$("importBtn").onclick=async()=>{
+ const file=$("csvFile").files[0], st=$("importStatus");
+ if(!file){st.className="status err";st.textContent="CSVファイルを選択してください。";return}
+ try{
+  const rows=parseCSV(await file.text());
+  if(rows.length<2) throw new Error("データ行がありません");
+  const H=rows[0].map(x=>x.trim()), idx=k=>H.indexOf(k);
+  const required=["code","name","sector","expected_return_pct","op_margin_3y_pct","forecast_per","pbr","roe_pct","net_cash_oku","fit"];
+  const missing=required.filter(k=>idx(k)<0);
+  if(missing.length) throw new Error("不足列: "+missing.join(", "));
+  let added=0, updated=0;
+  rows.slice(1).forEach(r=>{
+   const code=String(r[idx("code")]||"").trim();
+   if(!code) return;
+   const item={
+    code,
+    name:String(r[idx("name")]||"").trim(),
+    sec:String(r[idx("sector")]||"").trim(),
+    mcap:idx("market_cap_oku")>=0?n(r[idx("market_cap_oku")]):0,
+    ret:n(r[idx("expected_return_pct")]),
+    mar:n(r[idx("op_margin_3y_pct")]),
+    per:n(r[idx("forecast_per")]),
+    pbr:n(r[idx("pbr")]),
+    roe:n(r[idx("roe_pct")]),
+    nc:n(r[idx("net_cash_oku")]),
+    fit:String(r[idx("fit")]||"○").trim()||"○"
+   };
+   const p=D.findIndex(x=>x.code===code);
+   if(p>=0){D[p]={...D[p],...item};updated++} else {D.push(item);added++}
+  });
+  localStorage.setItem("kabukurabeeru_data",JSON.stringify(D));
+  selected.clear(); refreshSelectors(); render(); renderTrend();
+  st.className="status ok";
+  st.innerHTML="<b>取込完了</b><br>追加 "+added+"社 / 更新 "+updated+"社 / 登録合計 "+D.length+"社";
+ }catch(e){st.className="status err";st.textContent="読み込みエラー: "+e.message}
+};
+$("resetData").onclick=()=>{
+ if(!confirm("CSVで追加・更新したデータを消して、初期10社に戻しますか？")) return;
+ D=INITIAL.map(x=>({...x})); localStorage.removeItem("kabukurabeeru_data"); selected.clear();
+ refreshSelectors(); render(); renderTrend();
+ $("importStatus").className="status"; $("importStatus").textContent="初期10社に戻しました。";
+};
+
 function renderCompare(){const A=D.filter(x=>selected.has(x.code));$("chips").innerHTML=A.map(x=>"<span class='chip'>"+x.name+"</span>").join("");$("cmpnote").style.display=A.length>=2?"none":"block";if(A.length<2){$("ctable").innerHTML="";$("bars").innerHTML="";return}
 const metrics=[["期待利回り","ret","%"],["営業利益率","mar","%"],["予想PER","per","倍"],["PBR","pbr","倍"],["ROE","roe","%"],["ネットキャッシュ","nc","億円"]];
 $("ctable").innerHTML=metrics.map(m=>"<div class='metricrow'><div>"+m[0]+"</div>"+A.map(x=>"<div>"+(m[2]==="%"?x[m[1]].toFixed(1)+"%":x[m[1]].toLocaleString()+m[2])+"</div>").join("")+"</div>").join("");
