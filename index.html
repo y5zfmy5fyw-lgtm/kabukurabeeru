@@ -6,57 +6,107 @@
 <meta name="theme-color" content="#0b5dbb">
 <title>かぶくらべーる</title>
 <style>
-:root{--b:#0b5dbb;--bg:#eef5fb;--c:#fff;--t:#17324d;--m:#6b7c8f;--g:#16834f;--r:#c33}
+:root{--b:#0b5dbb;--bg:#eef5fb;--c:#fff;--t:#17324d;--m:#6b7c8f;--g:#16834f;--r:#c33;--line:#d9e4ee}
 *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--t)}
-header{background:linear-gradient(90deg,#0d3158,#0b5dbb);color:white;padding:18px 22px;position:sticky;top:0}
-h1{margin:0;font-size:24px}main{padding:16px;max-width:1200px;margin:auto}
+header{background:linear-gradient(90deg,#0d3158,#0b5dbb);color:#fff;padding:18px 22px;position:sticky;top:0;z-index:10}
+h1{margin:0;font-size:24px}.tabs{display:flex;gap:8px;margin-top:12px}.tabs button{border:0;border-radius:999px;padding:9px 14px;background:#ffffff22;color:#fff;font-weight:700}.tabs button.on{background:#fff;color:var(--b)}
+main{padding:16px;max-width:1280px;margin:auto}.page{display:none}.page.on{display:block}
 .card{background:var(--c);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 8px 24px #17324d14}
-.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-label{font-size:12px;font-weight:700;color:#456}input,select{width:100%;padding:10px;border:1px solid #cfdce8;border-radius:10px;background:white}
-.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:880px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap}th{background:#f5f8fb;font-size:12px}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2){text-align:left}
+.filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}label{font-size:12px;font-weight:700;color:#456;display:block;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid #cfdce8;border-radius:10px;background:#fff}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap}th{background:#f5f8fb;font-size:12px}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
 .pos{color:var(--g);font-weight:800}.neg{color:var(--r);font-weight:800}.pill{font-weight:800;background:#e8f6ef;color:#176a4c;border-radius:999px;padding:3px 8px}
-small{color:var(--m)}
-@media(max-width:760px){.filters{grid-template-columns:1fr 1fr}main{padding:10px}h1{font-size:21px}}
+small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;background:var(--b);color:#fff;font-weight:700}.btn.secondary{background:#e7f0f9;color:#174f81}
+.grid2{display:grid;grid-template-columns:1fr 360px;gap:16px}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.summary div{border:1px solid var(--line);border-radius:12px;padding:12px}.summary b{font-size:22px}
+.selchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.chip{background:#e8f2fb;padding:8px 11px;border-radius:999px;font-weight:700}
+.comparegrid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}.bars{display:flex;align-items:flex-end;gap:14px;height:300px;padding:20px 10px 0;border-bottom:1px solid var(--line)}.barcol{flex:1;text-align:center;min-width:55px}.vbar{width:72%;margin:auto;background:linear-gradient(180deg,#4aa1ec,#0b5dbb);border-radius:8px 8px 0 0;min-height:4px}.barlabel{font-size:11px;margin-top:7px}.metricrow{display:grid;grid-template-columns:180px repeat(5,1fr);gap:1px;background:var(--line);margin-bottom:1px}.metricrow>div{background:#fff;padding:10px;text-align:right}.metricrow>div:first-child{text-align:left;font-weight:700}
+.trendgrid{display:grid;grid-template-columns:1fr 340px;gap:16px}.trendbox{height:320px;display:flex;align-items:center;justify-content:center;color:var(--m);border:1px dashed #9eb5c9;border-radius:12px}
+.notice{background:#fff7dc;border:1px solid #ecd58a;color:#6d5600;padding:12px;border-radius:12px}
+@media(max-width:900px){.filters{grid-template-columns:repeat(3,1fr)}.grid2,.comparegrid,.trendgrid{grid-template-columns:1fr}}
+@media(max-width:640px){.filters{grid-template-columns:1fr 1fr}main{padding:10px}.tabs{overflow:auto}.tabs button{white-space:nowrap}}
 </style>
 </head>
 <body>
-<header><h1>かぶくらべーる</h1><div>比較して、見えてくる</div></header>
+<header>
+<h1>かぶくらべーる</h1><div>比較して、見えてくる</div>
+<div class="tabs">
+<button class="on" data-p="list">一覧</button>
+<button data-p="compare">比較</button>
+<button data-p="trend">推移</button>
+</div>
+</header>
 <main>
-<div class="card">
-  <b>iPad動作確認版</b><br><small>この画面で10社が表示されれば、iPad側の問題は「ローカルHTML」だったと切り分けできます。</small>
-</div>
+<section id="list" class="page on">
+<div class="card"><b>iPad対応MVP v0.2</b><br><small>一覧・絞り込み・2〜10社比較・比較グラフまで、外部ライブラリなしで動作します。</small></div>
 <div class="card filters">
- <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
- <div><label>期待利回り 最低(%)</label><input id="ret" type="number" value="-100"></div>
- <div><label>営業利益率 最低(%)</label><input id="mar" type="number" value="0"></div>
- <div><label>業種</label><select id="sec"><option value="">すべて</option></select></div>
+<div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
+<div><label>期待利回り 最低(%)</label><input id="ret" type="number" value="-100"></div>
+<div><label>営業利益率 最低(%)</label><input id="mar" type="number" value="0"></div>
+<div><label>予想PER 上限</label><input id="per" type="number" placeholder="指定なし"></div>
+<div><label>ROE 最低(%)</label><input id="roe" type="number" placeholder="指定なし"></div>
+<div><label>業種</label><select id="sec"><option value="">すべて</option></select></div>
 </div>
-<div class="card tablewrap">
-<table><thead><tr><th>銘柄</th><th>業種</th><th>期待利回り</th><th>営業利益率</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>NC(億円)</th><th>適合度</th></tr></thead><tbody id="body"></tbody></table>
+<div class="grid2">
+<div class="card tablewrap"><table><thead><tr><th>選択</th><th>銘柄</th><th>業種</th><th>期待利回り</th><th>営業利益率</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>NC(億円)</th><th>適合度</th></tr></thead><tbody id="body"></tbody></table></div>
+<div class="card">
+<h3>スクリーニング</h3>
+<div class="summary">
+<div><small>登録銘柄</small><br><b id="allc">10</b></div>
+<div><small>抽出後</small><br><b id="fc">10</b></div>
+<div><small>平均期待利回り</small><br><b id="avgr">—</b></div>
+<div><small>選択中</small><br><b id="sc">0</b></div>
 </div>
-<div class="card"><b id="count"></b><br><small>データはこのHTML内に埋め込み。外部ライブラリ・Excel読込・localStorageは使っていません。</small></div>
+<button class="btn" id="cmp" style="width:100%;margin-top:14px">選択銘柄を比較</button>
+</div>
+</div>
+</section>
+
+<section id="compare" class="page">
+<div class="card"><h2 style="margin-top:0">銘柄比較</h2><div id="chips" class="selchips"></div><div class="notice" id="cmpnote">一覧で2社以上を選択してください。</div></div>
+<div class="comparegrid">
+<div class="card"><h3>主要指標</h3><div id="ctable"></div></div>
+<div class="card"><h3>比較グラフ</h3>
+<label>指標</label><select id="metric"><option value="ret">期待利回り</option><option value="mar">営業利益率</option><option value="roe">ROE</option><option value="per">予想PER</option><option value="pbr">PBR</option><option value="nc">ネットキャッシュ</option></select>
+<div id="bars" class="bars"></div>
+</div>
+</div>
+</section>
+
+<section id="trend" class="page">
+<div class="card"><h2 style="margin-top:0">推移</h2><label>銘柄</label><select id="trendSel"></select></div>
+<div class="trendgrid">
+<div class="card"><h3>期待利回りの推移</h3><div class="trendbox">現時点では1回分のデータのみ。<br>次回更新から折れ線グラフ化します。</div></div>
+<div class="card"><h3>現在値</h3><div id="trendInfo"></div></div>
+</div>
+</section>
 </main>
 <script>
 const D=[
-["6432","竹内製作所","機械",37.6,16.43,12.89,1.79,15.97,562, "○"],
-["9735","セコム","サービス業",-34.9,12.47,24.51,1.97,8.72,3379,"○"],
-["5108","ブリヂストン","ゴム製品",-14.0,9.88,13.86,1.23,8.85,-1132,"○"],
-["5101","横浜ゴム","ゴム製品",5.3,12.92,9.17,0.96,10.95,-4284,"○"],
-["1801","大成建設","建設業",-37.0,7.45,13.62,2.20,18.74,-1905,"○"],
-["1802","大林組","建設業",-25.3,6.37,13.50,1.70,14.38,720,"○"],
-["1803","清水建設","建設業",-56.8,5.43,9.68,1.58,13.78,-2129,"○"],
-["1812","鹿島","建設業",-48.1,6.67,13.61,1.68,13.27,-4409,"○"],
-["2914","JT","食料品",-36.9,21.03,18.98,2.78,12.99,-8476,"○"],
-["6965","浜松ホトニクス","電気機器",-64.9,10.73,37.63,2.05,4.35,150,"○"]
-];
-const q=document.getElementById("q"),ret=document.getElementById("ret"),mar=document.getElementById("mar"),sec=document.getElementById("sec"),body=document.getElementById("body"),count=document.getElementById("count");
-[...new Set(D.map(x=>x[2]))].sort().forEach(s=>sec.insertAdjacentHTML("beforeend",'<option>'+s+'</option>'));
-function render(){
- const s=q.value.trim().toLowerCase(),r=+ret.value||-999,m=+mar.value||-999;
- const rows=D.filter(x=>(!s||x[0].includes(s)||x[1].toLowerCase().includes(s))&&x[3]>=r&&x[4]>=m&&(!sec.value||x[2]===sec.value));
- body.innerHTML=rows.map(x=>'<tr><td><b>'+x[1]+'</b><br><small>'+x[0]+'</small></td><td>'+x[2]+'</td><td class="'+(x[3]>=0?'pos':'neg')+'">'+x[3].toFixed(1)+'%</td><td>'+x[4].toFixed(2)+'%</td><td>'+x[5].toFixed(2)+'</td><td>'+x[6].toFixed(2)+'</td><td>'+x[7].toFixed(2)+'%</td><td>'+x[8].toLocaleString()+'</td><td><span class="pill">'+x[9]+'</span></td></tr>').join('');
- count.textContent='表示 '+rows.length+' / 10 銘柄';
-}
-[q,ret,mar,sec].forEach(e=>e.addEventListener("input",render));render();
+{code:"6432",name:"竹内製作所",sec:"機械",ret:37.6,mar:16.43,per:12.89,pbr:1.79,roe:15.97,nc:562,fit:"○"},
+{code:"9735",name:"セコム",sec:"サービス業",ret:-34.9,mar:12.47,per:24.51,pbr:1.97,roe:8.72,nc:3379,fit:"○"},
+{code:"5108",name:"ブリヂストン",sec:"ゴム製品",ret:-14.0,mar:9.88,per:13.86,pbr:1.23,roe:8.85,nc:-1132,fit:"○"},
+{code:"5101",name:"横浜ゴム",sec:"ゴム製品",ret:5.3,mar:12.92,per:9.17,pbr:0.96,roe:10.95,nc:-4284,fit:"○"},
+{code:"1801",name:"大成建設",sec:"建設業",ret:-37.0,mar:7.45,per:13.62,pbr:2.20,roe:18.74,nc:-1905,fit:"○"},
+{code:"1802",name:"大林組",sec:"建設業",ret:-25.3,mar:6.37,per:13.50,pbr:1.70,roe:14.38,nc:720,fit:"○"},
+{code:"1803",name:"清水建設",sec:"建設業",ret:-56.8,mar:5.43,per:9.68,pbr:1.58,roe:13.78,nc:-2129,fit:"○"},
+{code:"1812",name:"鹿島",sec:"建設業",ret:-48.1,mar:6.67,per:13.61,pbr:1.68,roe:13.27,nc:-4409,fit:"○"},
+{code:"2914",name:"JT",sec:"食料品",ret:-36.9,mar:21.03,per:18.98,pbr:2.78,roe:12.99,nc:-8476,fit:"○"},
+{code:"6965",name:"浜松ホトニクス",sec:"電気機器",ret:-64.9,mar:10.73,per:37.63,pbr:2.05,roe:4.35,nc:150,fit:"○"}];
+const $=id=>document.getElementById(id), tabs=[...document.querySelectorAll("[data-p]")], selected=new Set();
+[...new Set(D.map(x=>x.sec))].sort().forEach(s=>$("sec").insertAdjacentHTML("beforeend","<option>"+s+"</option>"));
+$("trendSel").innerHTML=D.map(x=>"<option value='"+x.code+"'>"+x.name+" ("+x.code+")</option>").join("");
+tabs.forEach(b=>b.onclick=()=>show(b.dataset.p));
+function show(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));$(p).classList.add("on");tabs.forEach(x=>x.classList.toggle("on",x.dataset.p===p));if(p==="compare")renderCompare();if(p==="trend")renderTrend()}
+["q","ret","mar","per","roe","sec"].forEach(id=>$(id).addEventListener("input",render));
+function filtered(){const q=$("q").value.toLowerCase(),ret=+$("ret").value||-999,mar=+$("mar").value||-999,per=$("per").value===""?999:+$("per").value,roe=$("roe").value===""?-999:+$("roe").value,sec=$("sec").value;return D.filter(x=>(!q||x.name.toLowerCase().includes(q)||x.code.includes(q))&&x.ret>=ret&&x.mar>=mar&&x.per<=per&&x.roe>=roe&&(!sec||x.sec===sec))}
+function render(){const rows=filtered();$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</td><td>"+x.mar.toFixed(2)+"%</td><td>"+x.per.toFixed(2)+"</td><td>"+x.pbr.toFixed(2)+"</td><td>"+x.roe.toFixed(2)+"%</td><td>"+x.nc.toLocaleString()+"</td><td><span class='pill'>"+x.fit+"</span></td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;$("avgr").textContent=rows.length?(rows.reduce((a,x)=>a+x.ret,0)/rows.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
+$("cmp").onclick=()=>{if(selected.size<2){alert("2社以上選択してください");return}show("compare")};
+$("metric").onchange=renderCompare;
+function renderCompare(){const A=D.filter(x=>selected.has(x.code));$("chips").innerHTML=A.map(x=>"<span class='chip'>"+x.name+"</span>").join("");$("cmpnote").style.display=A.length>=2?"none":"block";if(A.length<2){$("ctable").innerHTML="";$("bars").innerHTML="";return}
+const metrics=[["期待利回り","ret","%"],["営業利益率","mar","%"],["予想PER","per","倍"],["PBR","pbr","倍"],["ROE","roe","%"],["ネットキャッシュ","nc","億円"]];
+$("ctable").innerHTML=metrics.map(m=>"<div class='metricrow'><div>"+m[0]+"</div>"+A.map(x=>"<div>"+(m[2]==="%"?x[m[1]].toFixed(1)+"%":x[m[1]].toLocaleString()+m[2])+"</div>").join("")+"</div>").join("");
+const key=$("metric").value, max=Math.max(...A.map(x=>Math.abs(x[key])),1);$("bars").innerHTML=A.map(x=>"<div class='barcol'><div>"+(key==="ret"||key==="mar"||key==="roe"?x[key].toFixed(1)+"%":x[key].toLocaleString())+"</div><div class='vbar' style='height:"+Math.max(4,Math.abs(x[key])/max*210)+"px;opacity:"+(x[key]<0?.45:1)+"'></div><div class='barlabel'>"+x.name+"</div></div>").join("")}
+$("trendSel").onchange=renderTrend;
+function renderTrend(){const x=D.find(v=>v.code===$("trendSel").value)||D[0];$("trendInfo").innerHTML="<p><b>"+x.name+"</b> <small>"+x.code+"</small></p><p>期待利回り <span class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</span></p><p>営業利益率 "+x.mar.toFixed(2)+"%</p><p>PER "+x.per.toFixed(2)+"倍 / PBR "+x.pbr.toFixed(2)+"倍</p><p>ROE "+x.roe.toFixed(2)+"%</p>"}
+render();renderTrend();
 </script>
 </body></html>
