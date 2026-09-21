@@ -20,7 +20,7 @@ th:nth-child(1),th:nth-child(2){background:#f5f8fb}
 td:nth-child(1),td:nth-child(2){background:#fff}
 th:nth-child(2),td:nth-child(2){box-shadow:8px 0 10px -10px rgba(23,50,77,.45)}
 .fithelp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.fitcard{border:1px solid var(--line);border-radius:12px;padding:12px}.fitcard b{display:block;margin-bottom:4px}
-.pos{color:var(--g);font-weight:800}.neg{color:var(--r);font-weight:800}.pill{font-weight:800;background:#e8f6ef;color:#176a4c;border-radius:999px;padding:3px 8px}
+.pos{color:var(--g);font-weight:800}.neg{color:var(--r);font-weight:800}.pill{font-weight:800;background:#e8f6ef;color:#176a4c;border-radius:999px;padding:4px 9px;display:inline-block}
 small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;background:var(--b);color:#fff;font-weight:700}.btn.secondary{background:#e7f0f9;color:#174f81}
 .grid2{display:grid;grid-template-columns:1fr 360px;gap:16px}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.summary div{border:1px solid var(--line);border-radius:12px;padding:12px}.summary b{font-size:22px}
 .selchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.chip{background:#e8f2fb;padding:8px 11px;border-radius:999px;font-weight:700}
@@ -33,7 +33,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 .status.ok{background:#e8f6ef;color:#176a4c}.status.err{background:#fdecec;color:#9a2e2e}
 .codebox{overflow:auto;background:#f5f8fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px}
 @media(max-width:900px){.filters{grid-template-columns:repeat(3,1fr)}.grid2,.comparegrid,.trendgrid{grid-template-columns:1fr}}
-@media(max-width:640px){.filters{grid-template-columns:1fr 1fr}main{padding:10px}.tabs{overflow:auto}.tabs button{white-space:nowrap}}
+@media(max-width:640px){.filters{grid-template-columns:1fr 1fr}.fithelp{grid-template-columns:1fr}main{padding:10px}.tabs{overflow:auto}.tabs button{white-space:nowrap}}
 </style>
 </head>
 <body>
@@ -49,16 +49,8 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v0.7</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small></div>
-<div class="card">
-<h3 style="margin-top:0">かぶみーる適合度</h3>
-<small>この指標は「評価の正しさ」ではなく、現在の計算モデルをその企業にそのまま当てはめやすいかを示します。</small>
-<div class="fithelp">
-<div class="fitcard"><b>○ 標準</b><small>一般的な事業会社。営業利益・現金・有利子負債を使った比較がしやすい。</small></div>
-<div class="fitcard"><b>△ 特殊</b><small>持株会社・投資会社など。保有資産や事業構造の影響が大きく、補足確認が必要。</small></div>
-<div class="fitcard"><b>× 対象外寄り</b><small>銀行・保険など。負債が本業の資金調達そのもので、現行モデルとの相性が悪い。</small></div>
-</div>
-</div>
+<div class="card"><b>iPad対応MVP v0.8</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small></div>
+
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
 <div><label>予想PER 上限</label><input id="per" type="number" placeholder="指定なし"></div>
@@ -78,6 +70,15 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <div><small>選択中</small><br><b id="sc">0</b></div>
 </div>
 <button class="btn" id="cmp" style="width:100%;margin-top:14px">選択銘柄を比較</button>
+</div>
+</div>
+<div class="card">
+<h3 style="margin-top:0">企業価値モデル適合度</h3>
+<small>企業の稼ぐ力と財務状態から企業価値をみる計算モデルへの適合度です。</small>
+<div class="fithelp">
+<div class="fitcard"><b>○ 標準</b><small>稼ぐ力と財務状態で企業価値を捉えやすい企業。</small></div>
+<div class="fitcard"><b>△ 要補足</b><small>持株会社・投資会社など。保有資産や子会社の価値が大きく、このモデルだけでは評価しきれない企業。</small></div>
+<div class="fitcard"><b>× 別評価向き</b><small>銀行・保険など。他人資本を活用して収益を生む業態で、一般企業とは財務の見方が異なる企業。</small></div>
 </div>
 </div>
 </section>
@@ -181,6 +182,7 @@ D=D.map(x=>{
 });
 function calcGap(x){return x.mcap>0&&x.companyValue>0?(x.companyValue/x.mcap-1)*100:Number(x.ret||0)}
 function calcValuePrice(x){return x.price>0&&x.mcap>0&&x.companyValue>0?x.price*(x.companyValue/x.mcap):0}
+function fitText(v){return v==="△"?"△ 要補足":v==="×"?"× 別評価向き":"○ 標準"}
 D=D.map(x=>({...x,ret:calcGap(x)}));
 let HISTORY=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_history")||"{}");return v&&typeof v==="object"?v:{}}catch(e){return {}}})();
 const $=id=>document.getElementById(id), tabs=[...document.querySelectorAll("[data-p]")], selected=new Set();
@@ -205,7 +207,7 @@ tabs.forEach(b=>b.onclick=()=>show(b.dataset.p));
 function show(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));$(p).classList.add("on");tabs.forEach(x=>x.classList.toggle("on",x.dataset.p===p));if(p==="compare")renderCompare();if(p==="trend")renderTrend()}
 ["q","ret","mar","per","roe","sec"].forEach(id=>$(id).addEventListener("input",render));
 function filtered(){D=D.map(x=>({...x,ret:calcGap(x)}));const q=$("q").value.toLowerCase(),ret=+$("ret").value||-999,mar=+$("mar").value||-999,per=$("per").value===""?999:+$("per").value,roe=$("roe").value===""?-999:+$("roe").value,sec=$("sec").value;return D.filter(x=>(!q||x.name.toLowerCase().includes(q)||x.code.includes(q))&&x.ret>=ret&&x.mar>=mar&&x.per<=per&&x.roe>=roe&&(!sec||x.sec===sec))}
-function render(){const rows=filtered();$("allc").textContent=D.length;$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td>"+x.per.toFixed(2)+"</td><td>"+x.pbr.toFixed(2)+"</td><td>"+x.roe.toFixed(2)+"%</td><td>"+Number(x.mcap||0).toLocaleString()+"</td><td>"+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</td><td>"+x.mar.toFixed(2)+"%</td><td>"+x.nc.toLocaleString()+"</td><td class='"+(calcGap(x)>=0?"pos":"neg")+"'>"+calcGap(x).toFixed(1)+"%</td><td>"+(calcValuePrice(x)?Math.round(calcValuePrice(x)).toLocaleString()+"円":"—")+"</td><td><span class='pill'>"+x.fit+"</span></td><td>"+(x.updatedAt||"—")+"</td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;$("avgr").textContent=rows.length?(rows.reduce((a,x)=>a+x.ret,0)/rows.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
+function render(){const rows=filtered();$("allc").textContent=D.length;$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td>"+x.per.toFixed(2)+"</td><td>"+x.pbr.toFixed(2)+"</td><td>"+x.roe.toFixed(2)+"%</td><td>"+Number(x.mcap||0).toLocaleString()+"</td><td>"+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</td><td>"+x.mar.toFixed(2)+"%</td><td>"+x.nc.toLocaleString()+"</td><td class='"+(calcGap(x)>=0?"pos":"neg")+"'>"+calcGap(x).toFixed(1)+"%</td><td>"+(calcValuePrice(x)?Math.round(calcValuePrice(x)).toLocaleString()+"円":"—")+"</td><td><span class='pill'>"+fitText(x.fit)+"</span></td><td>"+(x.updatedAt||"—")+"</td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;$("avgr").textContent=rows.length?(rows.reduce((a,x)=>a+x.ret,0)/rows.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
 $("cmp").onclick=()=>{if(selected.size<2){alert("2社以上選択してください");return}show("compare")};
 $("metric").onchange=renderCompare;
 
