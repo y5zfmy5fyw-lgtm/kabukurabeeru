@@ -54,7 +54,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v0.9</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small></div>
+<div class="card"><b>iPad対応MVP v1.0</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small></div>
 
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
@@ -211,8 +211,8 @@ refreshSelectors();
 tabs.forEach(b=>b.onclick=()=>show(b.dataset.p));
 function show(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));$(p).classList.add("on");tabs.forEach(x=>x.classList.toggle("on",x.dataset.p===p));if(p==="compare")renderCompare();if(p==="trend")renderTrend()}
 ["q","ret","mar","per","roe","sec"].forEach(id=>$(id).addEventListener("input",render));
-function filtered(){D=D.map(x=>({...x,ret:calcGap(x)}));const q=$("q").value.toLowerCase(),ret=+$("ret").value||-999,mar=+$("mar").value||-999,per=$("per").value===""?999:+$("per").value,roe=$("roe").value===""?-999:+$("roe").value,sec=$("sec").value;return D.filter(x=>{const gap=calcGap(x);return (!q||x.name.toLowerCase().includes(q)||x.code.includes(q))&&(gap===null||gap>=ret)&&x.mar>=mar&&x.per<=per&&x.roe>=roe&&(!sec||x.sec===sec)})}
-function render(){const rows=filtered();$("allc").textContent=D.length;$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td>"+x.per.toFixed(2)+"</td><td>"+x.pbr.toFixed(2)+"</td><td>"+x.roe.toFixed(2)+"%</td><td>"+(x.mcap?Number(x.mcap).toLocaleString():"—")+"</td><td>"+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</td><td>"+x.mar.toFixed(2)+"%</td><td>"+x.nc.toLocaleString()+"</td><td class='"+(calcGap(x)===null?"":calcGap(x)>=0?"pos":"neg")+"'>"+(calcGap(x)===null?"—":calcGap(x).toFixed(1)+"%")+"</td><td>"+(calcValuePrice(x)?Math.round(calcValuePrice(x)).toLocaleString()+"円":"—")+"</td><td><span class='pill'>"+fitText(x.fit)+"</span></td><td>"+(x.updatedAt||"—")+"</td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;const validGaps=rows.map(calcGap).filter(v=>v!==null&&Number.isFinite(v));$("avgr").textContent=validGaps.length?(validGaps.reduce((a,v)=>a+v,0)/validGaps.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
+function filtered(){D=D.map(x=>({...x,ret:calcGap(x)}));const q=$("q").value.toLowerCase(),ret=+$("ret").value||-999,mar=+$("mar").value||-999,per=$("per").value===""?999:+$("per").value,roe=$("roe").value===""?-999:+$("roe").value,sec=$("sec").value;return D.filter(x=>{const gap=calcGap(x),okMar=x.mar==null?mar<=0:x.mar>=mar,okPer=x.per==null?per===999:x.per<=per,okRoe=x.roe==null?roe===-999:x.roe>=roe;return (!q||x.name.toLowerCase().includes(q)||x.code.includes(q))&&(gap===null||gap>=ret)&&okMar&&okPer&&okRoe&&(!sec||x.sec===sec)})}
+function render(){const rows=filtered();$("allc").textContent=D.length;$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td>"+f2(x.per)+"</td><td>"+f2(x.pbr)+"</td><td>"+fp(x.roe)+"</td><td>"+(x.mcap?Number(x.mcap).toLocaleString():"—")+"</td><td>"+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</td><td>"+fp(x.mar)+"</td><td>"+fn(x.nc)+"</td><td class='"+(calcGap(x)===null?"":calcGap(x)>=0?"pos":"neg")+"'>"+(calcGap(x)===null?"—":calcGap(x).toFixed(1)+"%")+"</td><td>"+(calcValuePrice(x)?Math.round(calcValuePrice(x)).toLocaleString()+"円":"—")+"</td><td><span class='pill'>"+fitText(x.fit)+"</span></td><td>"+(x.updatedAt||"—")+"</td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;const validGaps=rows.map(calcGap).filter(v=>v!==null&&Number.isFinite(Number(v)));$("avgr").textContent=validGaps.length?(validGaps.reduce((a,v)=>a+v,0)/validGaps.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
 $("cmp").onclick=()=>{if(selected.size<2){alert("2社以上選択してください");return}show("compare")};
 $("metric").onchange=renderCompare;
 
@@ -236,6 +236,10 @@ function parseCSV(text){
  return rows.filter(r=>r.some(v=>v!==""));
 }
 function n(v){const x=Number(String(v??"").replace(/,/g,""));return Number.isFinite(x)?x:0}
+function nOpt(v){const t=String(v??"").trim();if(t==="")return null;const x=Number(t.replace(/,/g,""));return Number.isFinite(x)?x:null}
+function f2(v){return v==null?"—":Number(v).toFixed(2)}
+function fp(v){return v==null?"—":Number(v).toFixed(2)+"%"}
+function fn(v){return v==null?"—":Number(v).toLocaleString()}
 $("importBtn").onclick=async()=>{
  const file=$("csvFile").files[0], st=$("importStatus");
  if(!file){st.className="status err";st.textContent="CSVファイルを選択してください。";return}
@@ -254,20 +258,20 @@ $("importBtn").onclick=async()=>{
     code,
     name:String(r[idx("name")]||"").trim(),
     sec:String(r[idx("sector")]||"").trim(),
-    mcap:idx("market_cap_oku")>=0?n(r[idx("market_cap_oku")]):0,
-    price:idx("current_price_yen")>=0?n(r[idx("current_price_yen")]):0,
-    companyValue:idx("company_value_oku")>=0?n(r[idx("company_value_oku")]):0,
-    ret:idx("company_value_gap_pct")>=0?n(r[idx("company_value_gap_pct")]):0,
-    mar:n(r[idx("op_margin_3y_pct")]),
-    per:n(r[idx("forecast_per")]),
-    pbr:n(r[idx("pbr")]),
-    roe:n(r[idx("roe_pct")]),
-    nc:n(r[idx("net_cash_oku")]),
+    mcap:idx("market_cap_oku")>=0?nOpt(r[idx("market_cap_oku")]):null,
+    price:idx("current_price_yen")>=0?nOpt(r[idx("current_price_yen")]):null,
+    companyValue:idx("company_value_oku")>=0?nOpt(r[idx("company_value_oku")]):null,
+    ret:idx("company_value_gap_pct")>=0?nOpt(r[idx("company_value_gap_pct")]):null,
+    mar:nOpt(r[idx("op_margin_3y_pct")]),
+    per:nOpt(r[idx("forecast_per")]),
+    pbr:nOpt(r[idx("pbr")]),
+    roe:nOpt(r[idx("roe_pct")]),
+    nc:nOpt(r[idx("net_cash_oku")]),
     fit:String(r[idx("fit")]||"○").trim()||"○",
     updatedAt:(idx("data_date")>=0?String(r[idx("data_date")]||"").trim():"")||new Date().toLocaleDateString("ja-JP"),
     source:(idx("source")>=0?String(r[idx("source")]||"").trim():"")||"CSV"
    };
-   if(!item.companyValue&&item.mcap&&idx("company_value_gap_pct")>=0&&String(r[idx("company_value_gap_pct")]??"").trim()!=="")item.companyValue=item.mcap*(1+item.ret/100);
+   if(!item.companyValue&&item.mcap&&item.ret!=null)item.companyValue=item.mcap*(1+item.ret/100);
    item.ret=calcGap(item);
    const p=D.findIndex(x=>x.code===code);
    if(p>=0){D[p]={...D[p],...item};updated++} else {D.push(item);added++}
@@ -298,7 +302,7 @@ $("metricUpdateBtn").onclick=async()=>{
    const p=D.findIndex(x=>x.code===code);
    if(p<0){skipped++;return}
    const cur={...D[p]};
-   const setNum=(col,key)=>{if(idx(col)>=0&&String(r[idx(col)]??"").trim()!=="")cur[key]=n(r[idx(col)])};
+   const setNum=(col,key)=>{if(idx(col)>=0&&String(r[idx(col)]??"").trim()!=="")cur[key]=nOpt(r[idx(col)])};
    setNum("current_price_yen","price"); setNum("market_cap_oku","mcap"); setNum("forecast_per","per"); setNum("pbr","pbr"); setNum("roe_pct","roe");
    cur.ret=calcGap(cur);
    if(idx("data_date")>=0&&String(r[idx("data_date")]||"").trim())cur.updatedAt=String(r[idx("data_date")]).trim();
@@ -336,17 +340,17 @@ $("resetData").onclick=()=>{
 
 function renderCompare(){const A=D.filter(x=>selected.has(x.code)).map(x=>({...x,ret:calcGap(x),valuePrice:calcValuePrice(x)}));$("chips").innerHTML=A.map(x=>"<span class='chip'>"+x.name+"</span>").join("");$("cmpnote").style.display=A.length>=2?"none":"block";if(A.length<2){$("ctable").innerHTML="";$("bars").innerHTML="";return}
 const metrics=[["予想PER","per","倍"],["PBR","pbr","倍"],["ROE","roe","%"],["時価総額","mcap","億円"],["現在株価","price","円"],["3年営業利益率","mar","%"],["ネットキャッシュ","nc","億円"],["企業価値ギャップ","ret","%"],["企業価値換算株価","valuePrice","円"]];
-$("ctable").innerHTML=metrics.map(m=>"<div class='metricrow'><div>"+m[0]+"</div>"+A.map(x=>"<div>"+(m[2]==="%"?(x[m[1]]==null?"—":x[m[1]].toFixed(1)+"%"):m[2]==="円"?Math.round(x[m[1]]||0).toLocaleString()+"円":x[m[1]].toLocaleString()+m[2])+"</div>").join("")+"</div>").join("");
+$("ctable").innerHTML=metrics.map(m=>"<div class='metricrow'><div>"+m[0]+"</div>"+A.map(x=>"<div>"+(x[m[1]]==null?"—":m[2]==="%"?Number(x[m[1]]).toFixed(1)+"%":m[2]==="円"?Math.round(Number(x[m[1]])).toLocaleString()+"円":Number(x[m[1]]).toLocaleString()+m[2])+"</div>").join("")+"</div>").join("");
 const key=$("metric").value, nums=A.map(x=>Number(x[key])).filter(Number.isFinite), max=Math.max(...nums.map(v=>Math.abs(v)),1);$("bars").innerHTML=A.map(x=>{const v=x[key];if(v==null||!Number.isFinite(Number(v)))return "<div class='barcol'><div>—</div><div class='barlabel'>"+x.name+"</div></div>";return "<div class='barcol'><div>"+(key==="ret"||key==="mar"||key==="roe"?Number(v).toFixed(1)+"%":Number(v).toLocaleString())+"</div><div class='vbar' style='height:"+Math.max(4,Math.abs(Number(v))/max*210)+"px;opacity:"+(Number(v)<0?.45:1)+"'></div><div class='barlabel'>"+x.name+"</div></div>"}).join("")}
 $("trendSel").onchange=renderTrend;
 $("trendMetric").onchange=renderTrend;
 function metricDef(k){return {per:["予想PER","倍"],pbr:["PBR","倍"],roe:["ROE","%"],mcap:["時価総額","億円"],mar:["3年営業利益率","%"],nc:["ネットキャッシュ","億円"],ret:["企業価値ギャップ","%"],valuePrice:["企業価値換算株価","円"]}[k]}
-function fmtMetric(k,v){if(k==="nc"||k==="mcap")return Number(v).toLocaleString()+"億円";if(k==="valuePrice")return Math.round(Number(v)).toLocaleString()+"円";if(k==="per"||k==="pbr")return Number(v).toFixed(2)+"倍";return Number(v).toFixed(1)+"%"}
+function fmtMetric(k,v){if(v==null||!Number.isFinite(Number(v)))return "—";if(k==="nc"||k==="mcap")return Number(v).toLocaleString()+"億円";if(k==="valuePrice")return Math.round(Number(v)).toLocaleString()+"円";if(k==="per"||k==="pbr")return Number(v).toFixed(2)+"倍";return Number(v).toFixed(1)+"%"}
 function trendSVG(points,key){
- const W=760,H=300,L=54,R=20,T=24,B=44, vals=points.map(p=>Number(p[key])).filter(Number.isFinite);
+ const W=760,H=300,L=54,R=20,T=24,B=44, usable=points.filter(p=>p[key]!=null&&Number.isFinite(Number(p[key]))), vals=usable.map(p=>Number(p[key]));
  if(!vals.length)return '<div style="padding:30px;color:var(--m)">履歴データがありません。</div>';
  let min=Math.min(...vals), max=Math.max(...vals); if(min===max){const pad=Math.max(Math.abs(min)*.1,1);min-=pad;max+=pad}else{const pad=(max-min)*.15;min-=pad;max+=pad}
- const X=i=>points.length===1?(L+(W-R))/2:L+i*((W-R-L)/(points.length-1));
+ points=usable; const X=i=>points.length===1?(L+(W-R))/2:L+i*((W-R-L)/(points.length-1));
  const Y=v=>T+(max-v)*(H-T-B)/(max-min);
  const ticks=[0,.25,.5,.75,1].map(t=>({v:min+(max-min)*t,y:Y(min+(max-min)*t)}));
  const grid=ticks.map(t=>'<line x1="'+L+'" y1="'+t.y+'" x2="'+(W-R)+'" y2="'+t.y+'" stroke="#e6edf4"/><text x="'+(L-8)+'" y="'+(t.y+4)+'" text-anchor="end" font-size="11" fill="#6b7c8f">'+(key==="nc"?Math.round(t.v).toLocaleString():t.v.toFixed(1))+'</text>').join("");
@@ -360,7 +364,7 @@ function renderTrend(){
  $("trendTitle").textContent=def[0]+"の推移";
  $("trendChart").innerHTML=trendSVG(hist,key);
  $("trendMeta").innerHTML="<small>保存履歴 "+hist.length+"件。CSVを読み込むたびに、その時点の値を追加保存します。</small>";
- $("trendInfo").innerHTML="<p><b>"+x.name+"</b> <small>"+x.code+"</small></p><p>予想PER "+x.per.toFixed(2)+"倍 / PBR "+x.pbr.toFixed(2)+"倍</p><p>ROE "+x.roe.toFixed(2)+"%</p><p>時価総額 "+(x.mcap?Number(x.mcap).toLocaleString()+"億円":"—")+"</p><p>現在株価 "+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</p><p>3年営業利益率 "+x.mar.toFixed(2)+"%</p><p>ネットキャッシュ "+x.nc.toLocaleString()+"億円</p><p>企業価値ギャップ "+(x.ret===null?"—":"<span class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</span>")+"</p><p>企業価値換算株価 "+(x.valuePrice?Math.round(x.valuePrice).toLocaleString()+"円":"—")+"</p><p>更新日 "+(x.updatedAt||"—")+"</p><p>出典 "+(x.source||"—")+"</p>";
+ $("trendInfo").innerHTML="<p><b>"+x.name+"</b> <small>"+x.code+"</small></p><p>予想PER "+(x.per==null?"—":Number(x.per).toFixed(2)+"倍")+" / PBR "+(x.pbr==null?"—":Number(x.pbr).toFixed(2)+"倍")+"</p><p>ROE "+(x.roe==null?"—":Number(x.roe).toFixed(2)+"%")+"</p><p>時価総額 "+(x.mcap?Number(x.mcap).toLocaleString()+"億円":"—")+"</p><p>現在株価 "+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</p><p>3年営業利益率 "+(x.mar==null?"—":Number(x.mar).toFixed(2)+"%")+"</p><p>ネットキャッシュ "+(x.nc==null?"—":Number(x.nc).toLocaleString()+"億円")+"</p><p>企業価値ギャップ "+(x.ret===null?"—":"<span class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</span>")+"</p><p>企業価値換算株価 "+(x.valuePrice?Math.round(x.valuePrice).toLocaleString()+"円":"—")+"</p><p>更新日 "+(x.updatedAt||"—")+"</p><p>出典 "+(x.source||"—")+"</p>";
  $("historyList").innerHTML=hist.length?hist.slice().reverse().slice(0,10).map(h=>"<div class='histitem'><b>"+h.label+"</b><br>"+def[0]+" "+fmtMetric(key,h[key])+"</div>").join(""):"<small>履歴なし</small>";
 }
 render();renderTrend();
