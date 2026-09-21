@@ -54,7 +54,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v1.0</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small></div>
+<div class="card"><b>iPad対応MVP v1.1</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small><br><small><b>データ基準：四季報ONLINE</b>。四季報で取得できない項目は他ソースで代替せず「算出不可」とします。</small></div>
 
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
@@ -139,7 +139,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </div>
 <div class="card">
   <h3>更新CSVの列</h3>
-  <div class="codebox">code, data_date, current_price_yen, market_cap_oku, forecast_per, pbr, roe_pct, source</div>
+  <div class="codebox">code, data_date, current_price_yen, market_cap_oku, forecast_per, pbr, roe_pct, source, data_basis, shikiho_issue, verification_status</div>
   <p><small>code以外は任意です。空欄の項目は現在値を維持します。新しい会社の追加は「取込」タブを使います。</small></p>
 </div>
 </section>
@@ -157,8 +157,8 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </div>
 <div class="card">
   <h3>今回のCSV列</h3>
-  <div class="codebox">code, name, sector, forecast_per, pbr, roe_pct, market_cap_oku, current_price_yen, op_margin_3y_pct, net_cash_oku, company_value_oku, company_value_gap_pct, value_price_yen, fit, data_date, source</div>
-  <p><small>CSVはUTF-8推奨。今回作成したテストCSVをそのまま利用できます。</small></p>
+  <div class="codebox">code, name, sector, forecast_per, pbr, roe_pct, market_cap_oku, current_price_yen, op_margin_3y_pct, net_cash_oku, company_value_oku, company_value_gap_pct, value_price_yen, fit, data_date, source, data_basis, shikiho_issue, verification_status</div>
+  <p><small>CSVはUTF-8推奨。正式データは data_basis=四季報ONLINE、verification_status=verified が必須です。四季報以外の数値を混在させたCSVは読み込みません。</small></p>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
   <button class="btn secondary" id="resetHistory">現在値を履歴の起点にする</button>
   <button class="btn secondary" id="resetData">初期10社に戻す</button>
@@ -247,13 +247,17 @@ $("importBtn").onclick=async()=>{
   const rows=parseCSV(await file.text());
   if(rows.length<2) throw new Error("データ行がありません");
   const H=rows[0].map(x=>x.trim()), idx=k=>H.indexOf(k);
-  const required=["code","name","sector","op_margin_3y_pct","forecast_per","pbr","roe_pct","net_cash_oku","fit"];
+  const required=["code","name","sector","op_margin_3y_pct","forecast_per","pbr","roe_pct","net_cash_oku","fit","data_basis","verification_status"];
   const missing=required.filter(k=>idx(k)<0);
   if(missing.length) throw new Error("不足列: "+missing.join(", "));
   let added=0, updated=0;
   rows.slice(1).forEach(r=>{
    const code=String(r[idx("code")]||"").trim();
    if(!code) return;
+   const basis=String(r[idx("data_basis")]||"").trim();
+   const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
+   if(basis!=="四季報ONLINE") throw new Error(code+" "+String(r[idx("name")]||"")+"：data_basis は「四季報ONLINE」のみ許可します");
+   if(verified!=="verified") throw new Error(code+" "+String(r[idx("name")]||"")+"：verification_status が verified ではありません");
    const item={
     code,
     name:String(r[idx("name")]||"").trim(),
@@ -269,7 +273,10 @@ $("importBtn").onclick=async()=>{
     nc:nOpt(r[idx("net_cash_oku")]),
     fit:String(r[idx("fit")]||"○").trim()||"○",
     updatedAt:(idx("data_date")>=0?String(r[idx("data_date")]||"").trim():"")||new Date().toLocaleDateString("ja-JP"),
-    source:(idx("source")>=0?String(r[idx("source")]||"").trim():"")||"CSV"
+    source:(idx("source")>=0?String(r[idx("source")]||"").trim():"")||"四季報ONLINE",
+    dataBasis:basis,
+    shikihoIssue:idx("shikiho_issue")>=0?String(r[idx("shikiho_issue")]||"").trim():"",
+    verificationStatus:verified
    };
    if(!item.companyValue&&item.mcap&&item.ret!=null)item.companyValue=item.mcap*(1+item.ret/100);
    item.ret=calcGap(item);
@@ -295,19 +302,26 @@ $("metricUpdateBtn").onclick=async()=>{
   if(rows.length<2) throw new Error("データ行がありません");
   const H=rows[0].map(x=>x.trim()), idx=k=>H.indexOf(k);
   if(idx("code")<0) throw new Error("code列がありません");
+  if(idx("data_basis")<0||idx("verification_status")<0) throw new Error("data_basis と verification_status が必要です");
   let updated=0, skipped=0;
   rows.slice(1).forEach(r=>{
    const code=String(r[idx("code")]||"").trim();
    if(!code) return;
    const p=D.findIndex(x=>x.code===code);
    if(p<0){skipped++;return}
-   const cur={...D[p]};
+   const basis=String(r[idx("data_basis")]||"").trim();
+   const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
+   if(basis!=="四季報ONLINE") throw new Error(code+"：data_basis は「四季報ONLINE」のみ許可します");
+   if(verified!=="verified") throw new Error(code+"：verification_status が verified ではありません");
+   const cur={...D[p],dataBasis:basis,verificationStatus:verified};
    const setNum=(col,key)=>{if(idx(col)>=0&&String(r[idx(col)]??"").trim()!=="")cur[key]=nOpt(r[idx(col)])};
    setNum("current_price_yen","price"); setNum("market_cap_oku","mcap"); setNum("forecast_per","per"); setNum("pbr","pbr"); setNum("roe_pct","roe");
    cur.ret=calcGap(cur);
    if(idx("data_date")>=0&&String(r[idx("data_date")]||"").trim())cur.updatedAt=String(r[idx("data_date")]).trim();
    else cur.updatedAt=new Date().toLocaleDateString("ja-JP");
    if(idx("source")>=0&&String(r[idx("source")]||"").trim())cur.source=String(r[idx("source")]).trim();
+   else cur.source="四季報ONLINE";
+   if(idx("shikiho_issue")>=0&&String(r[idx("shikiho_issue")]||"").trim())cur.shikihoIssue=String(r[idx("shikiho_issue")]).trim();
    D[p]=cur; updated++;
    const now=new Date(), stamp=now.toISOString(), label=cur.updatedAt||stampLabel(now);
    if(!Array.isArray(HISTORY[code]))HISTORY[code]=[];
