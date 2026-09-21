@@ -1,0 +1,13 @@
+{
+  "name": "かぶくらべーる",
+  "short_name": "かぶくらべーる",
+  "description": "企業価値ギャップなどを比較する株式分析アプリ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef5fb",
+  "theme_color": "#0b5dbb",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
