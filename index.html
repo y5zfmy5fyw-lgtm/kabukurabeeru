@@ -180,7 +180,7 @@ const PRICE_20260918={"6432":7280,"9735":6436,"5108":3730,"5101":6825,"1801":126
 D=D.map(x=>{
  const mcap=Number(x.mcap||0), oldGap=Number(x.ret||0);
  const companyValue=Number(x.companyValue||x.company_value_oku||(mcap?mcap*(1+oldGap/100):0));
- return {...x,mcap,companyValue,price:Number(x.price||PRICE_20260918[x.code]||0),updatedAt:x.updatedAt||"2026/9/18",source:x.source||"Yahoo!ファイナンス / かぶみーる"};
+ return {...x,mcap,companyValue,price:Number(x.price||PRICE_20260918[x.code]||0),updatedAt:x.updatedAt||"2026/9/18",source:x.source||"かぶみーる"};
 });
 function calcGap(x){return x.mcap>0&&x.companyValue>0?(x.companyValue/x.mcap-1)*100:null}
 function fitText(v){return v==="△"?"△ 要補足":v==="×"?"× 別評価向き":"○ 標準"}
@@ -377,6 +377,10 @@ $("metricUpdateBtn").onclick=async()=>{
    const cur={...D[p],dataBasis:basis,verificationStatus:verified};
    const setNum=(col,key)=>{if(idx(col)>=0&&String(r[idx(col)]??"").trim()!=="")cur[key]=nOpt(r[idx(col)])};
    setNum("current_price_yen","price"); setNum("market_cap_oku","mcap"); setNum("forecast_per","per"); setNum("pbr","pbr"); setNum("week_change_pct","weekChange"); setNum("weekly_turnover_oku","weeklyTurnover"); setNum("turnover_4w_ratio","turnover4wRatio");
+   // 週次CSVに財務修正列が含まれている場合だけ反映する。通常の週次更新では列を入れなければ変更しない。
+   setNum("op_margin_3y_pct","mar");
+   if(idx("op_margin_method")>=0&&String(r[idx("op_margin_method")]||"").trim())cur.opMarginMethod=String(r[idx("op_margin_method")]).trim();
+   if(idx("financial_updated_at")>=0&&String(r[idx("financial_updated_at")]||"").trim())cur.financialUpdatedAt=String(r[idx("financial_updated_at")]).trim();
    cur.ret=calcGap(cur);
    if(idx("market_updated_at")>=0&&String(r[idx("market_updated_at")]||"").trim())cur.marketUpdatedAt=String(r[idx("market_updated_at")]).trim();
    else if(idx("data_date")>=0&&String(r[idx("data_date")]||"").trim())cur.marketUpdatedAt=String(r[idx("data_date")]).trim();
