@@ -43,7 +43,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </head>
 <body>
 <header>
-<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.6</small></h1><div>比較して、見えてくる</div>
+<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.7</small></h1><div>比較して、見えてくる</div>
 <div class="tabs">
 <button class="on" data-p="list">一覧</button>
 <button data-p="compare">比較</button>
@@ -157,8 +157,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
   <div class="codebox">code, name, sector, forecast_per, pbr, roe_pct, market_cap_oku, current_price_yen, sales_current_forecast_oku, sales_prev_oku, sales_prev2_oku, op_current_forecast_oku, op_prev_oku, op_prev2_oku, op_margin_3y_pct, op_margin_method, net_cash_oku, company_value_oku, company_value_gap_pct, fit, data_date, source_main, source_debt, data_basis, verification_status</div>
   <p><small>CSVはUTF-8推奨。標準データ基準は「銘柄スカウター＋会社開示」。各年の売上高・営業利益があれば、3年間の各年度営業利益率とトレンドを自動算出します。</small></p>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-  <button class="btn secondary" id="resetHistory">現在値を履歴の起点にする</button>
-  <button class="btn secondary" id="resetData">初期10社に戻す</button>
+  <button class="btn secondary" id="resetHistory">履歴をリセットして現在値を起点にする</button>
   </div>
 </div>
 </section>
@@ -412,12 +411,6 @@ $("resetHistory").onclick=()=>{
  renderTrend();
  $("importStatus").className="status ok";
  $("importStatus").textContent="履歴をリセットしました。現在の銘柄データを新しい起点として1件保存しています。";
-};
-$("resetData").onclick=()=>{
- if(!confirm("CSVで追加・更新したデータを消して、初期10社に戻しますか？")) return;
- D=INITIAL.map(x=>({...x})); HISTORY={}; localStorage.removeItem("kabukurabeeru_data"); localStorage.removeItem("kabukurabeeru_history"); selected.clear();
- ensureInitialHistory(); refreshSelectors(); render(); renderTrend();
- $("importStatus").className="status"; $("importStatus").textContent="初期10社に戻しました。";
 };
 
 function renderCompare(){const A=D.filter(x=>selected.has(x.code)).map(x=>({...x,ret:calcGap(x)}));$("chips").innerHTML=A.map(x=>"<span class='chip'>"+x.name+"</span>").join("");$("cmpnote").style.display=A.length>=2?"none":"block";if(A.length<2){$("ctable").innerHTML="";$("bars").innerHTML="";return}
