@@ -309,7 +309,7 @@ $("importBtn").onclick=async()=>{
    const basis=String(r[idx("data_basis")]||"").trim();
    const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
    if(!/^銘柄スカウター＋会社開示/.test(basis)&&basis!=="四季報ONLINE") throw new Error(code+" "+String(r[idx("name")]||"")+"：data_basis が標準ルール外です");
-   if(verified!=="verified") throw new Error(code+" "+String(r[idx("name")]||"")+"：verification_status が verified ではありません");
+   if(!["verified","pending","verified_reference_only"].includes(verified)) throw new Error(code+" "+String(r[idx("name")]||"")+"：verification_status が未対応です");
    const item={
     code,
     name:String(r[idx("name")]||"").trim(),
@@ -373,7 +373,7 @@ $("metricUpdateBtn").onclick=async()=>{
    const basis=String(r[idx("data_basis")]||"").trim();
    const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
    if(!/^銘柄スカウター＋会社開示/.test(basis)&&basis!=="四季報ONLINE") throw new Error(code+"：data_basis が標準ルール外です");
-   if(verified!=="verified") throw new Error(code+"：verification_status が verified ではありません");
+   if(!["verified","pending","verified_reference_only"].includes(verified)) throw new Error(code+"：verification_status が未対応です");
    const cur={...D[p],dataBasis:basis,verificationStatus:verified};
    const setNum=(col,key)=>{if(idx(col)>=0&&String(r[idx(col)]??"").trim()!=="")cur[key]=nOpt(r[idx(col)])};
    setNum("current_price_yen","price"); setNum("market_cap_oku","mcap"); setNum("forecast_per","per"); setNum("pbr","pbr"); setNum("week_change_pct","weekChange"); setNum("weekly_turnover_oku","weeklyTurnover"); setNum("turnover_4w_ratio","turnover4wRatio");
