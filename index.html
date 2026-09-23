@@ -43,7 +43,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </head>
 <body>
 <header>
-<h1>かぶくらべーる</h1><div>比較して、見えてくる</div>
+<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.4</small></h1><div>比較して、見えてくる</div>
 <div class="tabs">
 <button class="on" data-p="list">一覧</button>
 <button data-p="compare">比較</button>
@@ -167,7 +167,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 const INITIAL=[
 {code:"6432",name:"竹内製作所",sec:"機械",ret:37.6,mar:16.43,per:12.89,pbr:1.79,roe:15.97,nc:562,fit:"○"},
 {code:"9735",name:"セコム",sec:"サービス業",ret:-34.9,mar:12.47,per:24.51,pbr:1.97,roe:8.72,nc:3379,fit:"○"},
-{code:"5108",name:"ブリヂストン",sec:"ゴム製品",ret:-14.0,mar:9.88,per:13.86,pbr:1.23,roe:8.85,nc:-1132,fit:"○"},
+{code:"5108",name:"ブリヂストン",sec:"ゴム製品",ret:-14.0,mar:11.10,per:13.86,pbr:1.23,roe:8.85,nc:-1132,fit:"○",opMarginMethod:"actual_3y"},
 {code:"5101",name:"横浜ゴム",sec:"ゴム製品",ret:5.3,mar:12.92,per:9.17,pbr:0.96,roe:10.95,nc:-4284,fit:"○"},
 {code:"1801",name:"大成建設",sec:"建設業",ret:-37.0,mar:7.45,per:13.62,pbr:2.20,roe:18.74,nc:-1905,fit:"○"},
 {code:"1802",name:"大林組",sec:"建設業",ret:-25.3,mar:6.37,per:13.50,pbr:1.70,roe:14.38,nc:720,fit:"○"},
@@ -176,6 +176,9 @@ const INITIAL=[
 {code:"2914",name:"JT",sec:"食料品",ret:-36.9,mar:21.03,per:18.98,pbr:2.78,roe:12.99,nc:-8476,fit:"○"},
 {code:"6965",name:"浜松ホトニクス",sec:"電気機器",ret:-64.9,mar:10.73,per:37.63,pbr:2.05,roe:4.35,nc:150,fit:"○"}];
 let D=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_data")||"null");return Array.isArray(v)&&v.length?v:INITIAL.map(x=>({...x}))}catch(e){return INITIAL.map(x=>({...x}))}})();
+// v1.4 data migration: fix stale Bridgestone margin already stored in localStorage.
+D=D.map(x=>x.code==="5108"?{...x,mar:11.10,opMarginMethod:"actual_3y"}:x);
+localStorage.setItem("kabukurabeeru_data",JSON.stringify(D));
 const PRICE_20260918={"6432":7280,"9735":6436,"5108":3730,"5101":6825,"1801":12620,"1802":3083,"1803":2358,"1812":4979,"2914":6886,"6965":2246.5,"4063":5844};
 D=D.map(x=>{
  const mcap=Number(x.mcap||0), oldGap=Number(x.ret||0);
