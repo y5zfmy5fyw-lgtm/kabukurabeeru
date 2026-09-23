@@ -18,7 +18,7 @@ h1{margin:0;font-size:24px}.tabs{display:flex;gap:8px;margin-top:12px}.tabs butt
 main{padding:16px;max-width:1280px;margin:auto}.page{display:none}.page.on{display:block}
 .card{background:var(--c);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 8px 24px #17324d14}
 .filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}label{font-size:12px;font-weight:700;color:#456;display:block;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid #cfdce8;border-radius:10px;background:#fff}
-.tablewrap{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1240px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap;background:#fff}th{background:#f5f8fb;font-size:12px;position:sticky;top:0;z-index:3}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1760px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap;background:#fff}th{background:#f5f8fb;font-size:12px;position:sticky;top:0;z-index:3}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
 th:nth-child(1),td:nth-child(1){position:sticky;left:0;z-index:5;min-width:58px}
 th:nth-child(2),td:nth-child(2){position:sticky;left:58px;z-index:4;min-width:150px}
 th:nth-child(1),th:nth-child(2){background:#f5f8fb}
@@ -36,7 +36,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 .importbox input[type=file]{max-width:520px;margin:12px auto}
 .status{margin-top:14px;padding:12px;border-radius:12px;background:#eef5fb;line-height:1.7}
 .status.ok{background:#e8f6ef;color:#176a4c}.status.err{background:#fdecec;color:#9a2e2e}
-.codebox{overflow:auto;background:#f5f8fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px}
+.codebox{overflow:auto;background:#f5f8fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px}.sourceLink{color:var(--b);text-decoration:none}.sourceLink:hover{text-decoration:underline}.trendCell{min-width:130px}.trendBadge{display:inline-block;font-weight:800;font-size:12px;border-radius:999px;padding:3px 8px;background:#eef5fb;color:#174f81;margin-bottom:4px}.spark{width:82px;height:28px;vertical-align:middle}.muted{color:var(--m)}
 @media(max-width:900px){.filters{grid-template-columns:repeat(3,1fr)}.grid2,.comparegrid,.trendgrid{grid-template-columns:1fr}}
 @media(max-width:640px){.filters{grid-template-columns:1fr 1fr}.fithelp{grid-template-columns:1fr}main{padding:10px}.tabs{overflow:auto}.tabs button{white-space:nowrap}}
 </style>
@@ -54,18 +54,18 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v1.1</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標の順で比較できます。</small><br><small><b>データ基準：四季報ONLINE</b>。四季報で取得できない項目は他ソースで代替せず「算出不可」とします。</small></div>
+<div class="card"><b>iPad対応MVP v1.2</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標→週次資金動向の順で比較できます。</small><br><small><b>データ基準：マネックス 銘柄スカウターライト＋会社開示</b>。銘柄名から主要データ収集先へ移動できます。</small></div>
 
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
-<div><label>予想PER 上限</label><input id="per" type="number" placeholder="指定なし"></div>
-<div><label>ROE 最低(%)</label><input id="roe" type="number" placeholder="指定なし"></div>
-<div><label>3年営業利益率 最低(%)</label><input id="mar" type="number" value="0"></div>
-<div><label>企業価値ギャップ 最低(%)</label><input id="ret" type="number" value="-100"></div>
+<div><label>予想PER</label><select id="perRange"><option value="">すべて</option><option value="lt10">10倍未満</option><option value="10_15">10〜15倍</option><option value="15_20">15〜20倍</option><option value="20_30">20〜30倍</option><option value="gte30">30倍以上</option></select></div>
+<div><label>ROE</label><select id="roeRange"><option value="">すべて</option><option value="lt5">5%未満</option><option value="5_10">5〜10%</option><option value="10_15">10〜15%</option><option value="gte15">15%以上</option></select></div>
+<div><label>3年営業利益率</label><select id="marRange"><option value="">すべて</option><option value="lt5">5%未満</option><option value="5_10">5〜10%</option><option value="10_15">10〜15%</option><option value="15_20">15〜20%</option><option value="gte20">20%以上</option></select></div>
+<div><label>企業価値ギャップ</label><select id="retRange"><option value="">すべて</option><option value="ltm50">-50%未満</option><option value="m50_0">-50〜0%</option><option value="0_25">0〜25%</option><option value="25_50">25〜50%</option><option value="gte50">50%以上</option></select></div>
 <div><label>業種</label><select id="sec"><option value="">すべて</option></select></div>
 </div>
 <div class="grid2">
-<div class="card tablewrap"><table><thead><tr><th>選択</th><th>銘柄</th><th>業種</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>時価総額(億円)</th><th>現在株価</th><th>3年営業利益率</th><th>ネットキャッシュ(億円)</th><th>企業価値ギャップ</th><th>企業価値換算株価</th><th>適合度</th><th>更新日</th></tr></thead><tbody id="body"></tbody></table></div>
+<div class="card tablewrap"><table><thead><tr><th>選択</th><th>銘柄</th><th>業種</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>時価総額(億円)</th><th>現在株価</th><th>3年営業利益率</th><th>利益率トレンド</th><th>ネットキャッシュ(億円)</th><th>企業価値ギャップ</th><th>週間騰落率</th><th>週間売買代金(億円)</th><th>4週平均比</th><th>適合度</th><th>市場更新日</th><th>財務更新日</th></tr></thead><tbody id="body"></tbody></table></div>
 <div class="card">
 <h3>スクリーニング</h3>
 <div class="summary">
@@ -93,7 +93,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <div class="comparegrid">
 <div class="card"><h3>主要指標</h3><div id="ctable"></div></div>
 <div class="card"><h3>比較グラフ</h3>
-<label>指標</label><select id="metric"><option value="per">予想PER</option><option value="pbr">PBR</option><option value="roe">ROE</option><option value="mcap">時価総額</option><option value="mar">3年営業利益率</option><option value="nc">ネットキャッシュ</option><option value="ret">企業価値ギャップ</option><option value="valuePrice">企業価値換算株価</option></select>
+<label>指標</label><select id="metric"><option value="per">予想PER</option><option value="pbr">PBR</option><option value="roe">ROE</option><option value="mcap">時価総額</option><option value="mar">3年営業利益率</option><option value="nc">ネットキャッシュ</option><option value="ret">企業価値ギャップ</option><option value="weekChange">週間騰落率</option><option value="weeklyTurnover">週間売買代金</option><option value="turnover4wRatio">4週平均比</option></select>
 <div id="bars" class="bars"></div>
 </div>
 </div>
@@ -112,7 +112,9 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <option value="mar">3年営業利益率</option>
 <option value="nc">ネットキャッシュ</option>
 <option value="ret">企業価値ギャップ</option>
-<option value="valuePrice">企業価値換算株価</option>
+<option value="weekChange">週間騰落率</option>
+<option value="weeklyTurnover">週間売買代金</option>
+<option value="turnover4wRatio">4週平均比</option>
 </select></div>
 </div>
 </div>
@@ -128,19 +130,19 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 
 <section id="update" class="page">
 <div class="card">
-  <h2 style="margin-top:0">最新指標の更新</h2>
-  <p>既存銘柄の株価・時価総額・予想PER・PBR・ROEを更新できます。時価総額が変わると企業価値ギャップ、株価が変わると企業価値換算株価を自動再計算します。</p>
+  <h2 style="margin-top:0">毎週金曜・7項目更新</h2>
+  <p>既存銘柄の <b>現在株価・時価総額・PBR・予想PER・週間騰落率・週間売買代金・4週平均売買代金比</b> を更新します。時価総額更新後、企業価値ギャップも自動再計算します。</p>
   <div class="importbox">
-    <b>指標更新CSVを選択</b>
+    <b>週次更新CSVを選択</b>
     <input id="metricFile" type="file" accept=".csv,text/csv">
-    <button class="btn" id="metricUpdateBtn">最新指標を更新</button>
+    <button class="btn" id="metricUpdateBtn">週次7項目を更新</button>
     <div id="metricStatus" class="status">まだ更新していません。</div>
   </div>
 </div>
 <div class="card">
-  <h3>更新CSVの列</h3>
-  <div class="codebox">code, data_date, current_price_yen, market_cap_oku, forecast_per, pbr, roe_pct, source, data_basis, shikiho_issue, verification_status</div>
-  <p><small>code以外は任意です。空欄の項目は現在値を維持します。新しい会社の追加は「取込」タブを使います。</small></p>
+  <h3>週次更新CSVの列</h3>
+  <div class="codebox">code, market_updated_at, current_price_yen, market_cap_oku, forecast_per, pbr, week_change_pct, weekly_turnover_oku, turnover_4w_ratio, source_main, data_basis, verification_status</div>
+  <p><small>code以外の数値列は空欄なら現在値を維持します。ROE・3年営業利益率・ネットキャッシュ・企業価値ギャップの基礎財務は決算後更新で扱います。</small></p>
 </div>
 </section>
 
@@ -157,8 +159,8 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </div>
 <div class="card">
   <h3>今回のCSV列</h3>
-  <div class="codebox">code, name, sector, forecast_per, pbr, roe_pct, market_cap_oku, current_price_yen, op_margin_3y_pct, net_cash_oku, company_value_oku, company_value_gap_pct, value_price_yen, fit, data_date, source, data_basis, shikiho_issue, verification_status</div>
-  <p><small>CSVはUTF-8推奨。正式データは data_basis=四季報ONLINE、verification_status=verified が必須です。四季報以外の数値を混在させたCSVは読み込みません。</small></p>
+  <div class="codebox">code, name, sector, forecast_per, pbr, roe_pct, market_cap_oku, current_price_yen, sales_current_forecast_oku, sales_prev_oku, sales_prev2_oku, op_current_forecast_oku, op_prev_oku, op_prev2_oku, op_margin_3y_pct, net_cash_oku, company_value_oku, company_value_gap_pct, fit, data_date, source_main, source_debt, data_basis, verification_status</div>
+  <p><small>CSVはUTF-8推奨。標準データ基準は「銘柄スカウター＋会社開示」。各年の売上高・営業利益があれば、3年間の各年度営業利益率とトレンドを自動算出します。</small></p>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
   <button class="btn secondary" id="resetHistory">現在値を履歴の起点にする</button>
   <button class="btn secondary" id="resetData">初期10社に戻す</button>
@@ -186,13 +188,41 @@ D=D.map(x=>{
  return {...x,mcap,companyValue,price:Number(x.price||PRICE_20260918[x.code]||0),updatedAt:x.updatedAt||"2026/9/18",source:x.source||"Yahoo!ファイナンス / かぶみーる"};
 });
 function calcGap(x){return x.mcap>0&&x.companyValue>0?(x.companyValue/x.mcap-1)*100:null}
-function calcValuePrice(x){return x.price>0&&x.mcap>0&&x.companyValue>0?x.price*(x.companyValue/x.mcap):0}
 function fitText(v){return v==="△"?"△ 要補足":v==="×"?"× 別評価向き":"○ 標準"}
 D=D.map(x=>({...x,ret:calcGap(x)}));
 let HISTORY=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_history")||"{}");return v&&typeof v==="object"?v:{}}catch(e){return {}}})();
 const $=id=>document.getElementById(id), tabs=[...document.querySelectorAll("[data-p]")], selected=new Set();
 function stampLabel(d=new Date()){return d.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}
-function snapshotItem(x,stamp,label){return {stamp,label,ret:calcGap(x),mar:x.mar,per:x.per,pbr:x.pbr,roe:x.roe,nc:x.nc,mcap:x.mcap||0,price:x.price||0,companyValue:x.companyValue||0,valuePrice:calcValuePrice(x),dataDate:x.updatedAt||"",source:x.source||""}}
+function annualMargins(x){
+ const vals=[
+  [x.salesPrev2,x.opPrev2],
+  [x.salesPrev,x.opPrev],
+  [x.salesCurrent,x.opCurrent]
+ ].map(([sales,op])=>Number(sales)>0&&Number.isFinite(Number(op))?Number(op)/Number(sales)*100:null);
+ return vals;
+}
+function marginTrend(x){
+ const v=annualMargins(x);
+ if(v.some(z=>z==null||!Number.isFinite(z))) return {label:"判定不可",values:v};
+ const [a,b,c]=v, t=.5, d1=b-a, d2=c-b;
+ let label="ボックス";
+ if(d1>t&&d2>t) label="上昇";
+ else if(d1<-t&&d2<-t) label="下落";
+ else if(d1>t&&d2<-t) label="反落";
+ else if(d1<-t&&d2>t) label="反発期待";
+ else if(d1<-t&&Math.abs(d2)<=t) label="底値";
+ else if(Math.abs(d1)<=t&&d2>t) label="反発期待";
+ else if(Math.abs(d1)<=t&&d2<-t) label="下落";
+ return {label,values:v};
+}
+function sparkline(values){
+ const vals=values.filter(v=>v!=null&&Number.isFinite(Number(v)));
+ if(vals.length!==3)return '<span class="muted">—</span>';
+ const W=82,H=28,P=3,min=Math.min(...vals),max=Math.max(...vals),span=max-min||1;
+ const pts=vals.map((v,i)=>(P+i*(W-2*P)/2)+","+(P+(max-v)*(H-2*P)/span)).join(" ");
+ return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><polyline points="'+pts+'" fill="none" stroke="#0b5dbb" stroke-width="2.5"/>'+vals.map((v,i)=>'<circle cx="'+(P+i*(W-2*P)/2)+'" cy="'+(P+(max-v)*(H-2*P)/span)+'" r="2.5" fill="#0b5dbb"/>').join("")+'</svg>';
+}
+function snapshotItem(x,stamp,label){const mt=marginTrend(x);return {stamp,label,ret:calcGap(x),mar:x.mar,per:x.per,pbr:x.pbr,roe:x.roe,nc:x.nc,mcap:x.mcap||0,price:x.price||0,companyValue:x.companyValue||0,weekChange:x.weekChange??null,weeklyTurnover:x.weeklyTurnover??null,turnover4wRatio:x.turnover4wRatio??null,marginTrend:mt.label,annualMargins:mt.values,dataDate:x.marketUpdatedAt||x.updatedAt||"",financialDate:x.financialUpdatedAt||"",source:x.sourceMainUrl||x.source||""}}
 function ensureInitialHistory(){
  let changed=false, now=new Date(), stamp=now.toISOString(), label=stampLabel(now);
  D.forEach(x=>{if(!Array.isArray(HISTORY[x.code])||!HISTORY[x.code].length){HISTORY[x.code]=[snapshotItem(x,stamp,label)];changed=true}});
@@ -210,9 +240,18 @@ function refreshSelectors(){
 refreshSelectors();
 tabs.forEach(b=>b.onclick=()=>show(b.dataset.p));
 function show(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));$(p).classList.add("on");tabs.forEach(x=>x.classList.toggle("on",x.dataset.p===p));if(p==="compare")renderCompare();if(p==="trend")renderTrend()}
-["q","ret","mar","per","roe","sec"].forEach(id=>$(id).addEventListener("input",render));
-function filtered(){D=D.map(x=>({...x,ret:calcGap(x)}));const q=$("q").value.toLowerCase(),ret=+$("ret").value||-999,mar=+$("mar").value||-999,per=$("per").value===""?999:+$("per").value,roe=$("roe").value===""?-999:+$("roe").value,sec=$("sec").value;return D.filter(x=>{const gap=calcGap(x),okMar=x.mar==null?mar<=0:x.mar>=mar,okPer=x.per==null?per===999:x.per<=per,okRoe=x.roe==null?roe===-999:x.roe>=roe;return (!q||x.name.toLowerCase().includes(q)||x.code.includes(q))&&(gap===null||gap>=ret)&&okMar&&okPer&&okRoe&&(!sec||x.sec===sec)})}
-function render(){const rows=filtered();$("allc").textContent=D.length;$("body").innerHTML=rows.map(x=>"<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td><b>"+x.name+"</b><br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td>"+f2(x.per)+"</td><td>"+f2(x.pbr)+"</td><td>"+fp(x.roe)+"</td><td>"+(x.mcap?Number(x.mcap).toLocaleString():"—")+"</td><td>"+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</td><td>"+fp(x.mar)+"</td><td>"+fn(x.nc)+"</td><td class='"+(calcGap(x)===null?"":calcGap(x)>=0?"pos":"neg")+"'>"+(calcGap(x)===null?"—":calcGap(x).toFixed(1)+"%")+"</td><td>"+(calcValuePrice(x)?Math.round(calcValuePrice(x)).toLocaleString()+"円":"—")+"</td><td><span class='pill'>"+fitText(x.fit)+"</span></td><td>"+(x.updatedAt||"—")+"</td></tr>").join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;const validGaps=rows.map(calcGap).filter(v=>v!==null&&Number.isFinite(Number(v)));$("avgr").textContent=validGaps.length?(validGaps.reduce((a,v)=>a+v,0)/validGaps.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
+["q","perRange","roeRange","marRange","retRange","sec"].forEach(id=>$(id).addEventListener("input",render));
+function inRange(v,r,type){
+ if(r==="")return true;
+ if(v==null||!Number.isFinite(Number(v)))return false;
+ v=Number(v);
+ if(type==="per"){if(r==="lt10")return v<10;if(r==="10_15")return v>=10&&v<15;if(r==="15_20")return v>=15&&v<20;if(r==="20_30")return v>=20&&v<30;if(r==="gte30")return v>=30}
+ if(type==="roe"||type==="mar"){if(r==="lt5")return v<5;if(r==="5_10")return v>=5&&v<10;if(r==="10_15")return v>=10&&v<15;if(r==="15_20")return v>=15&&v<20;if(r==="gte15")return v>=15;if(r==="gte20")return v>=20}
+ if(type==="ret"){if(r==="ltm50")return v<-50;if(r==="m50_0")return v>=-50&&v<0;if(r==="0_25")return v>=0&&v<25;if(r==="25_50")return v>=25&&v<50;if(r==="gte50")return v>=50}
+ return true;
+}
+function filtered(){D=D.map(x=>({...x,ret:calcGap(x)}));const q=$("q").value.toLowerCase(),sec=$("sec").value;return D.filter(x=>{const gap=calcGap(x);return (!q||x.name.toLowerCase().includes(q)||x.code.includes(q))&&inRange(x.per,$("perRange").value,"per")&&inRange(x.roe,$("roeRange").value,"roe")&&inRange(x.mar,$("marRange").value,"mar")&&inRange(gap,$("retRange").value,"ret")&&(!sec||x.sec===sec)})}
+function render(){const rows=filtered();$("allc").textContent=D.length;$("body").innerHTML=rows.map(x=>{const mt=marginTrend(x),name=x.sourceMainUrl?'<a class="sourceLink" href="'+x.sourceMainUrl+'" target="_blank" rel="noopener"><b>'+x.name+'</b></a>':'<b>'+x.name+'</b>';return "<tr><td><input type='checkbox' data-c='"+x.code+"' "+(selected.has(x.code)?"checked":"")+"></td><td>"+name+"<br><small>"+x.code+"</small></td><td>"+x.sec+"</td><td>"+f2(x.per)+"</td><td>"+f2(x.pbr)+"</td><td>"+fp(x.roe)+"</td><td>"+(x.mcap?Number(x.mcap).toLocaleString():"—")+"</td><td>"+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</td><td>"+fp(x.mar)+"</td><td class='trendCell'><span class='trendBadge'>"+mt.label+"</span><br>"+sparkline(mt.values)+"</td><td>"+fn(x.nc)+"</td><td class='"+(calcGap(x)===null?"":calcGap(x)>=0?"pos":"neg")+"'>"+(calcGap(x)===null?"—":calcGap(x).toFixed(1)+"%")+"</td><td>"+(x.weekChange==null?"—":Number(x.weekChange).toFixed(1)+"%")+"</td><td>"+(x.weeklyTurnover==null?"—":Number(x.weeklyTurnover).toLocaleString())+"</td><td>"+(x.turnover4wRatio==null?"—":Number(x.turnover4wRatio).toFixed(2)+"倍")+"</td><td><span class='pill'>"+fitText(x.fit)+"</span></td><td>"+(x.marketUpdatedAt||x.updatedAt||"—")+"</td><td>"+(x.financialUpdatedAt||x.updatedAt||"—")+"</td></tr>"}).join("");document.querySelectorAll("#body input").forEach(c=>c.onchange=e=>{e.target.checked?selected.add(e.target.dataset.c):selected.delete(e.target.dataset.c);$("sc").textContent=selected.size});$("fc").textContent=rows.length;const validGaps=rows.map(calcGap).filter(v=>v!==null&&Number.isFinite(Number(v)));$("avgr").textContent=validGaps.length?(validGaps.reduce((a,v)=>a+v,0)/validGaps.length).toFixed(1)+"%":"—";$("sc").textContent=selected.size}
 $("cmp").onclick=()=>{if(selected.size<2){alert("2社以上選択してください");return}show("compare")};
 $("metric").onchange=renderCompare;
 
@@ -256,7 +295,7 @@ $("importBtn").onclick=async()=>{
    if(!code) return;
    const basis=String(r[idx("data_basis")]||"").trim();
    const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
-   if(basis!=="四季報ONLINE") throw new Error(code+" "+String(r[idx("name")]||"")+"：data_basis は「四季報ONLINE」のみ許可します");
+   if(!/^銘柄スカウター＋会社開示/.test(basis)&&basis!=="四季報ONLINE") throw new Error(code+" "+String(r[idx("name")]||"")+"：data_basis が標準ルール外です");
    if(verified!=="verified") throw new Error(code+" "+String(r[idx("name")]||"")+"：verification_status が verified ではありません");
    const item={
     code,
@@ -273,9 +312,18 @@ $("importBtn").onclick=async()=>{
     nc:nOpt(r[idx("net_cash_oku")]),
     fit:String(r[idx("fit")]||"○").trim()||"○",
     updatedAt:(idx("data_date")>=0?String(r[idx("data_date")]||"").trim():"")||new Date().toLocaleDateString("ja-JP"),
-    source:(idx("source")>=0?String(r[idx("source")]||"").trim():"")||"四季報ONLINE",
+    marketUpdatedAt:(idx("data_date")>=0?String(r[idx("data_date")]||"").trim():"")||new Date().toLocaleDateString("ja-JP"),
+    financialUpdatedAt:(idx("data_date")>=0?String(r[idx("data_date")]||"").trim():"")||new Date().toLocaleDateString("ja-JP"),
+    sourceMainUrl:idx("source_main")>=0?String(r[idx("source_main")]||"").trim():"",
+    sourceDebtUrl:idx("source_debt")>=0&&/^https?:/.test(String(r[idx("source_debt")]||"").trim())?String(r[idx("source_debt")]).trim():"",
+    salesCurrent:idx("sales_current_forecast_oku")>=0?nOpt(r[idx("sales_current_forecast_oku")]):null,
+    salesPrev:idx("sales_prev_oku")>=0?nOpt(r[idx("sales_prev_oku")]):null,
+    salesPrev2:idx("sales_prev2_oku")>=0?nOpt(r[idx("sales_prev2_oku")]):null,
+    opCurrent:idx("op_current_forecast_oku")>=0?nOpt(r[idx("op_current_forecast_oku")]):null,
+    opPrev:idx("op_prev_oku")>=0?nOpt(r[idx("op_prev_oku")]):null,
+    opPrev2:idx("op_prev2_oku")>=0?nOpt(r[idx("op_prev2_oku")]):null,
+    source:"マネックス 銘柄スカウターライト＋会社開示",
     dataBasis:basis,
-    shikihoIssue:idx("shikiho_issue")>=0?String(r[idx("shikiho_issue")]||"").trim():"",
     verificationStatus:verified
    };
    if(!item.companyValue&&item.mcap&&item.ret!=null)item.companyValue=item.mcap*(1+item.ret/100);
@@ -311,17 +359,18 @@ $("metricUpdateBtn").onclick=async()=>{
    if(p<0){skipped++;return}
    const basis=String(r[idx("data_basis")]||"").trim();
    const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
-   if(basis!=="四季報ONLINE") throw new Error(code+"：data_basis は「四季報ONLINE」のみ許可します");
+   if(!/^銘柄スカウター＋会社開示/.test(basis)&&basis!=="四季報ONLINE") throw new Error(code+"：data_basis が標準ルール外です");
    if(verified!=="verified") throw new Error(code+"：verification_status が verified ではありません");
    const cur={...D[p],dataBasis:basis,verificationStatus:verified};
    const setNum=(col,key)=>{if(idx(col)>=0&&String(r[idx(col)]??"").trim()!=="")cur[key]=nOpt(r[idx(col)])};
-   setNum("current_price_yen","price"); setNum("market_cap_oku","mcap"); setNum("forecast_per","per"); setNum("pbr","pbr"); setNum("roe_pct","roe");
+   setNum("current_price_yen","price"); setNum("market_cap_oku","mcap"); setNum("forecast_per","per"); setNum("pbr","pbr"); setNum("week_change_pct","weekChange"); setNum("weekly_turnover_oku","weeklyTurnover"); setNum("turnover_4w_ratio","turnover4wRatio");
    cur.ret=calcGap(cur);
-   if(idx("data_date")>=0&&String(r[idx("data_date")]||"").trim())cur.updatedAt=String(r[idx("data_date")]).trim();
-   else cur.updatedAt=new Date().toLocaleDateString("ja-JP");
-   if(idx("source")>=0&&String(r[idx("source")]||"").trim())cur.source=String(r[idx("source")]).trim();
-   else cur.source="四季報ONLINE";
-   if(idx("shikiho_issue")>=0&&String(r[idx("shikiho_issue")]||"").trim())cur.shikihoIssue=String(r[idx("shikiho_issue")]).trim();
+   if(idx("market_updated_at")>=0&&String(r[idx("market_updated_at")]||"").trim())cur.marketUpdatedAt=String(r[idx("market_updated_at")]).trim();
+   else if(idx("data_date")>=0&&String(r[idx("data_date")]||"").trim())cur.marketUpdatedAt=String(r[idx("data_date")]).trim();
+   else cur.marketUpdatedAt=new Date().toLocaleDateString("ja-JP");
+   cur.updatedAt=cur.marketUpdatedAt;
+   if(idx("source_main")>=0&&String(r[idx("source_main")]||"").trim())cur.sourceMainUrl=String(r[idx("source_main")]).trim();
+   cur.source="マネックス 銘柄スカウターライト＋週次市場データ";
    D[p]=cur; updated++;
    const now=new Date(), stamp=now.toISOString(), label=cur.updatedAt||stampLabel(now);
    if(!Array.isArray(HISTORY[code]))HISTORY[code]=[];
@@ -352,14 +401,14 @@ $("resetData").onclick=()=>{
  $("importStatus").className="status"; $("importStatus").textContent="初期10社に戻しました。";
 };
 
-function renderCompare(){const A=D.filter(x=>selected.has(x.code)).map(x=>({...x,ret:calcGap(x),valuePrice:calcValuePrice(x)}));$("chips").innerHTML=A.map(x=>"<span class='chip'>"+x.name+"</span>").join("");$("cmpnote").style.display=A.length>=2?"none":"block";if(A.length<2){$("ctable").innerHTML="";$("bars").innerHTML="";return}
-const metrics=[["予想PER","per","倍"],["PBR","pbr","倍"],["ROE","roe","%"],["時価総額","mcap","億円"],["現在株価","price","円"],["3年営業利益率","mar","%"],["ネットキャッシュ","nc","億円"],["企業価値ギャップ","ret","%"],["企業価値換算株価","valuePrice","円"]];
+function renderCompare(){const A=D.filter(x=>selected.has(x.code)).map(x=>({...x,ret:calcGap(x)}));$("chips").innerHTML=A.map(x=>"<span class='chip'>"+x.name+"</span>").join("");$("cmpnote").style.display=A.length>=2?"none":"block";if(A.length<2){$("ctable").innerHTML="";$("bars").innerHTML="";return}
+const metrics=[["予想PER","per","倍"],["PBR","pbr","倍"],["ROE","roe","%"],["時価総額","mcap","億円"],["現在株価","price","円"],["3年営業利益率","mar","%"],["ネットキャッシュ","nc","億円"],["企業価値ギャップ","ret","%"],["週間騰落率","weekChange","%"],["週間売買代金","weeklyTurnover","億円"],["4週平均比","turnover4wRatio","倍"]];
 $("ctable").innerHTML=metrics.map(m=>"<div class='metricrow'><div>"+m[0]+"</div>"+A.map(x=>"<div>"+(x[m[1]]==null?"—":m[2]==="%"?Number(x[m[1]]).toFixed(1)+"%":m[2]==="円"?Math.round(Number(x[m[1]])).toLocaleString()+"円":Number(x[m[1]]).toLocaleString()+m[2])+"</div>").join("")+"</div>").join("");
 const key=$("metric").value, nums=A.map(x=>Number(x[key])).filter(Number.isFinite), max=Math.max(...nums.map(v=>Math.abs(v)),1);$("bars").innerHTML=A.map(x=>{const v=x[key];if(v==null||!Number.isFinite(Number(v)))return "<div class='barcol'><div>—</div><div class='barlabel'>"+x.name+"</div></div>";return "<div class='barcol'><div>"+(key==="ret"||key==="mar"||key==="roe"?Number(v).toFixed(1)+"%":Number(v).toLocaleString())+"</div><div class='vbar' style='height:"+Math.max(4,Math.abs(Number(v))/max*210)+"px;opacity:"+(Number(v)<0?.45:1)+"'></div><div class='barlabel'>"+x.name+"</div></div>"}).join("")}
 $("trendSel").onchange=renderTrend;
 $("trendMetric").onchange=renderTrend;
-function metricDef(k){return {per:["予想PER","倍"],pbr:["PBR","倍"],roe:["ROE","%"],mcap:["時価総額","億円"],mar:["3年営業利益率","%"],nc:["ネットキャッシュ","億円"],ret:["企業価値ギャップ","%"],valuePrice:["企業価値換算株価","円"]}[k]}
-function fmtMetric(k,v){if(v==null||!Number.isFinite(Number(v)))return "—";if(k==="nc"||k==="mcap")return Number(v).toLocaleString()+"億円";if(k==="valuePrice")return Math.round(Number(v)).toLocaleString()+"円";if(k==="per"||k==="pbr")return Number(v).toFixed(2)+"倍";return Number(v).toFixed(1)+"%"}
+function metricDef(k){return {per:["予想PER","倍"],pbr:["PBR","倍"],roe:["ROE","%"],mcap:["時価総額","億円"],mar:["3年営業利益率","%"],nc:["ネットキャッシュ","億円"],ret:["企業価値ギャップ","%"],weekChange:["週間騰落率","%"],weeklyTurnover:["週間売買代金","億円"],turnover4wRatio:["4週平均比","倍"]}[k]}
+function fmtMetric(k,v){if(v==null||!Number.isFinite(Number(v)))return "—";if(k==="nc"||k==="mcap"||k==="weeklyTurnover")return Number(v).toLocaleString()+"億円";if(k==="per"||k==="pbr"||k==="turnover4wRatio")return Number(v).toFixed(2)+"倍";return Number(v).toFixed(1)+"%"}
 function trendSVG(points,key){
  const W=760,H=300,L=54,R=20,T=24,B=44, usable=points.filter(p=>p[key]!=null&&Number.isFinite(Number(p[key]))), vals=usable.map(p=>Number(p[key]));
  if(!vals.length)return '<div style="padding:30px;color:var(--m)">履歴データがありません。</div>';
@@ -374,11 +423,11 @@ function trendSVG(points,key){
  return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+grid+'<line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="#aebdca"/>'+poly+dots+labels+'</svg>';
 }
 function renderTrend(){
- const x0=D.find(v=>v.code===$("trendSel").value)||D[0], x={...x0,ret:calcGap(x0),valuePrice:calcValuePrice(x0)}, key=$("trendMetric").value||"ret", def=metricDef(key), hist0=Array.isArray(HISTORY[x.code])?HISTORY[x.code]:[], hist=hist0.map(h=>({...h,ret:h.companyValue&&h.mcap?(h.companyValue/h.mcap-1)*100:h.ret,valuePrice:h.price&&h.companyValue&&h.mcap?h.price*(h.companyValue/h.mcap):(h.valuePrice||0)}));
+ const x0=D.find(v=>v.code===$("trendSel").value)||D[0], x={...x0,ret:calcGap(x0)}, key=$("trendMetric").value||"ret", def=metricDef(key), hist0=Array.isArray(HISTORY[x.code])?HISTORY[x.code]:[], hist=hist0.map(h=>({...h,ret:h.companyValue&&h.mcap?(h.companyValue/h.mcap-1)*100:h.ret}));
  $("trendTitle").textContent=def[0]+"の推移";
  $("trendChart").innerHTML=trendSVG(hist,key);
  $("trendMeta").innerHTML="<small>保存履歴 "+hist.length+"件。CSVを読み込むたびに、その時点の値を追加保存します。</small>";
- $("trendInfo").innerHTML="<p><b>"+x.name+"</b> <small>"+x.code+"</small></p><p>予想PER "+(x.per==null?"—":Number(x.per).toFixed(2)+"倍")+" / PBR "+(x.pbr==null?"—":Number(x.pbr).toFixed(2)+"倍")+"</p><p>ROE "+(x.roe==null?"—":Number(x.roe).toFixed(2)+"%")+"</p><p>時価総額 "+(x.mcap?Number(x.mcap).toLocaleString()+"億円":"—")+"</p><p>現在株価 "+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</p><p>3年営業利益率 "+(x.mar==null?"—":Number(x.mar).toFixed(2)+"%")+"</p><p>ネットキャッシュ "+(x.nc==null?"—":Number(x.nc).toLocaleString()+"億円")+"</p><p>企業価値ギャップ "+(x.ret===null?"—":"<span class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</span>")+"</p><p>企業価値換算株価 "+(x.valuePrice?Math.round(x.valuePrice).toLocaleString()+"円":"—")+"</p><p>更新日 "+(x.updatedAt||"—")+"</p><p>出典 "+(x.source||"—")+"</p>";
+ $("trendInfo").innerHTML="<p><b>"+x.name+"</b> <small>"+x.code+"</small></p><p>予想PER "+(x.per==null?"—":Number(x.per).toFixed(2)+"倍")+" / PBR "+(x.pbr==null?"—":Number(x.pbr).toFixed(2)+"倍")+"</p><p>ROE "+(x.roe==null?"—":Number(x.roe).toFixed(2)+"%")+"</p><p>時価総額 "+(x.mcap?Number(x.mcap).toLocaleString()+"億円":"—")+"</p><p>現在株価 "+(x.price?Number(x.price).toLocaleString()+"円":"—")+"</p><p>3年営業利益率 "+(x.mar==null?"—":Number(x.mar).toFixed(2)+"%")+"</p><p>利益率トレンド <b>"+marginTrend(x).label+"</b> "+sparkline(marginTrend(x).values)+"</p><p>ネットキャッシュ "+(x.nc==null?"—":Number(x.nc).toLocaleString()+"億円")+"</p><p>企業価値ギャップ "+(x.ret===null?"—":"<span class='"+(x.ret>=0?"pos":"neg")+"'>"+x.ret.toFixed(1)+"%</span>")+"</p><p>週間騰落率 "+(x.weekChange==null?"—":Number(x.weekChange).toFixed(1)+"%")+"</p><p>週間売買代金 "+(x.weeklyTurnover==null?"—":Number(x.weeklyTurnover).toLocaleString()+"億円")+"</p><p>4週平均比 "+(x.turnover4wRatio==null?"—":Number(x.turnover4wRatio).toFixed(2)+"倍")+"</p><p>市場更新日 "+(x.marketUpdatedAt||x.updatedAt||"—")+"</p><p>財務更新日 "+(x.financialUpdatedAt||x.updatedAt||"—")+"</p><p>出典 "+(x.sourceMainUrl?"<a class='sourceLink' target='_blank' rel='noopener' href='"+x.sourceMainUrl+"'>マネックス銘柄ページ</a>":(x.source||"—"))+"</p>";
  $("historyList").innerHTML=hist.length?hist.slice().reverse().slice(0,10).map(h=>"<div class='histitem'><b>"+h.label+"</b><br>"+def[0]+" "+fmtMetric(key,h[key])+"</div>").join(""):"<small>履歴なし</small>";
 }
 render();renderTrend();
