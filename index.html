@@ -18,7 +18,7 @@ h1{margin:0;font-size:24px}.tabs{display:flex;gap:8px;margin-top:12px}.tabs butt
 main{padding:16px;max-width:1280px;margin:auto}.page{display:none}.page.on{display:block}
 .card{background:var(--c);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 8px 24px #17324d14}
 .filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}label{font-size:12px;font-weight:700;color:#456;display:block;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid #cfdce8;border-radius:10px;background:#fff}
-.tablewrap{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1760px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap;background:#fff}th{background:#f5f8fb;font-size:12px;position:sticky;top:0;z-index:3}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
+.tablewrap{overflow:auto;max-height:calc(100vh - 210px);position:relative}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1760px}th,td{padding:11px 9px;border-bottom:1px solid #e5edf4;text-align:right;white-space:nowrap;background:#fff}th{background:#f5f8fb;font-size:12px;position:sticky;top:0;z-index:7;box-shadow:0 1px 0 #d9e4ee}th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
 th:nth-child(1),td:nth-child(1){position:sticky;left:0;z-index:5;min-width:58px}
 th:nth-child(2),td:nth-child(2){position:sticky;left:58px;z-index:4;min-width:150px}
 th:nth-child(1),th:nth-child(2){background:#f5f8fb}
@@ -27,7 +27,7 @@ th:nth-child(2),td:nth-child(2){box-shadow:8px 0 10px -10px rgba(23,50,77,.45)}
 .fithelp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.fitcard{border:1px solid var(--line);border-radius:12px;padding:12px}.fitcard b{display:block;margin-bottom:4px}
 .pos{color:var(--g);font-weight:800}.neg{color:var(--r);font-weight:800}.pill{font-weight:800;background:#e8f6ef;color:#176a4c;border-radius:999px;padding:4px 9px;display:inline-block}
 small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;background:var(--b);color:#fff;font-weight:700}.btn.secondary{background:#e7f0f9;color:#174f81}
-.grid2{display:grid;grid-template-columns:1fr 360px;gap:16px}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.summary div{border:1px solid var(--line);border-radius:12px;padding:12px}.summary b{font-size:22px}
+.grid2{display:grid;grid-template-columns:1fr 360px;gap:16px}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.summary div{border:1px solid var(--line);border-radius:12px;padding:12px}.summary b{font-size:22px}.screeningBar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:10px 14px}.screeningStat{font-size:13px;color:var(--m)}.screeningStat b{color:var(--t);font-size:15px}.screeningBar .btn{margin-left:auto;padding:9px 13px}
 .selchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.chip{background:#e8f2fb;padding:8px 11px;border-radius:999px;font-weight:700}
 .comparegrid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}.bars{display:flex;align-items:flex-end;gap:14px;height:300px;padding:20px 10px 0;border-bottom:1px solid var(--line)}.barcol{flex:1;text-align:center;min-width:55px}.vbar{width:72%;margin:auto;background:linear-gradient(180deg,#4aa1ec,#0b5dbb);border-radius:8px 8px 0 0;min-height:4px}.barlabel{font-size:11px;margin-top:7px}.metricrow{display:grid;grid-template-columns:180px repeat(5,1fr);gap:1px;background:var(--line);margin-bottom:1px}.metricrow>div{background:#fff;padding:10px;text-align:right}.metricrow>div:first-child{text-align:left;font-weight:700}
 .trendgrid{display:grid;grid-template-columns:1fr 340px;gap:16px}.trendchart{height:330px;border:1px solid var(--line);border-radius:12px;background:#fbfdff;overflow:hidden}.trendchart svg{width:100%;height:100%;display:block}.histitem{padding:9px 0;border-bottom:1px solid #edf2f6;font-size:13px}.histitem:last-child{border-bottom:0}
@@ -37,7 +37,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 .status{margin-top:14px;padding:12px;border-radius:12px;background:#eef5fb;line-height:1.7}
 .status.ok{background:#e8f6ef;color:#176a4c}.status.err{background:#fdecec;color:#9a2e2e}
 .codebox{overflow:auto;background:#f5f8fb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px}.sourceLink{color:var(--b);text-decoration:none}.sourceLink:hover{text-decoration:underline}.trendCell{min-width:130px}.trendBadge{display:inline-block;font-weight:800;font-size:12px;border-radius:999px;padding:3px 8px;background:#eef5fb;color:#174f81;margin-bottom:4px}.dataBadge{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:800;vertical-align:1px}.dataBadge.forecastDiff{background:#eef5fb;color:#315f88}.dataBadge.noOp{background:#f0f2f4;color:#66717d}.spark{width:82px;height:28px;vertical-align:middle}.muted{color:var(--m)}
-@media(max-width:900px){.filters{grid-template-columns:repeat(3,1fr)}.grid2,.comparegrid,.trendgrid{grid-template-columns:1fr}}
+@media(max-width:900px){.filters{grid-template-columns:repeat(3,1fr)}.grid2,.comparegrid,.trendgrid{grid-template-columns:1fr}.tablewrap{max-height:calc(100vh - 190px)}.screeningBar .btn{margin-left:0}}
 @media(max-width:640px){.filters{grid-template-columns:1fr 1fr}.fithelp{grid-template-columns:1fr}main{padding:10px}.tabs{overflow:auto}.tabs button{white-space:nowrap}}
 </style>
 </head>
@@ -64,18 +64,13 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <div><label>企業価値ギャップ</label><select id="retRange"><option value="">すべて</option><option value="ltm50">-50%未満</option><option value="m50_0">-50〜0%</option><option value="0_25">0〜25%</option><option value="25_50">25〜50%</option><option value="gte50">50%以上</option></select></div>
 <div><label>業種</label><select id="sec"><option value="">すべて</option></select></div>
 </div>
-<div class="grid2">
 <div class="card tablewrap"><table><thead><tr><th>選択</th><th>銘柄</th><th>業種</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>時価総額(億円)</th><th>現在株価</th><th>3年営業利益率</th><th>利益率トレンド</th><th>ネットキャッシュ(億円)</th><th>企業価値ギャップ</th><th>週間騰落率</th><th>週間売買代金(億円)</th><th>4週平均比</th><th>適合度</th><th>市場更新日</th><th>財務更新日</th></tr></thead><tbody id="body"></tbody></table></div>
-<div class="card">
-<h3>スクリーニング</h3>
-<div class="summary">
-<div><small>登録銘柄</small><br><b id="allc">10</b></div>
-<div><small>抽出後</small><br><b id="fc">10</b></div>
-<div><small>平均企業価値ギャップ</small><br><b id="avgr">—</b></div>
-<div><small>選択中</small><br><b id="sc">0</b></div>
-</div>
-<button class="btn" id="cmp" style="width:100%;margin-top:14px">選択銘柄を比較</button>
-</div>
+<div class="card screeningBar">
+<span class="screeningStat">登録 <b id="allc">10</b></span>
+<span class="screeningStat">抽出 <b id="fc">10</b></span>
+<span class="screeningStat">平均ギャップ <b id="avgr">—</b></span>
+<span class="screeningStat">選択 <b id="sc">0</b></span>
+<button class="btn" id="cmp">選択銘柄を比較</button>
 </div>
 <div class="card">
 <h3 style="margin-top:0">企業価値モデル適合度</h3>
