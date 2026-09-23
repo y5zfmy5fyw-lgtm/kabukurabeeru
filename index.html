@@ -159,7 +159,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </div>
 <div class="card">
   <h3>今回のCSV列</h3>
-  <div class="codebox">code, name, sector, forecast_per, pbr, roe_pct, market_cap_oku, current_price_yen, sales_current_forecast_oku, sales_prev_oku, sales_prev2_oku, op_current_forecast_oku, op_prev_oku, op_prev2_oku, op_margin_3y_pct, net_cash_oku, company_value_oku, company_value_gap_pct, fit, data_date, source_main, source_debt, data_basis, verification_status</div>
+  <div class="codebox">code, name, sector, forecast_per, pbr, roe_pct, market_cap_oku, current_price_yen, sales_current_forecast_oku, sales_prev_oku, sales_prev2_oku, op_current_forecast_oku, op_prev_oku, op_prev2_oku, op_margin_3y_pct, op_margin_method, net_cash_oku, company_value_oku, company_value_gap_pct, fit, data_date, source_main, source_debt, data_basis, verification_status</div>
   <p><small>CSVはUTF-8推奨。標準データ基準は「銘柄スカウター＋会社開示」。各年の売上高・営業利益があれば、3年間の各年度営業利益率とトレンドを自動算出します。</small></p>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
   <button class="btn secondary" id="resetHistory">現在値を履歴の起点にする</button>
@@ -202,6 +202,8 @@ function annualMargins(x){
  return vals;
 }
 function marginTrend(x){
+ const method=x.opMarginMethod||"forecast_3y";
+ if(method==="not_applicable") return {label:"対象外",values:[null,null,null]};
  const v=annualMargins(x);
  if(v.some(z=>z==null||!Number.isFinite(z))) return {label:"判定不可",values:v};
  const [a,b,c]=v, t=.5, d1=b-a, d2=c-b;
@@ -225,6 +227,8 @@ const SPECIAL_DATA={
  "8031":{label:"別指標評価",kind:"noOp",note:"三井物産：営業利益率だけでは評価しにくいため、3年営業利益率トレンドは対象外"}
 };
 function dataBadge(x){
+ if(x.opMarginMethod==="actual_3y") return '<span class="dataBadge forecastDiff" title="2024・2025・2026実績の3期で営業利益率トレンドを算出">実績3期</span>';
+ if(x.opMarginMethod==="not_applicable") return '<span class="dataBadge noOp" title="営業利益率だけでは評価しにくいため、3年営業利益率トレンドは対象外">別指標評価</span>';
  const d=SPECIAL_DATA[x.code];
  return d?'<span class="dataBadge '+d.kind+'" title="'+d.note+'">'+d.label+'</span>':"";
 }
@@ -309,7 +313,7 @@ $("importBtn").onclick=async()=>{
    const basis=String(r[idx("data_basis")]||"").trim();
    const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
    if(!/^銘柄スカウター＋会社開示/.test(basis)&&basis!=="四季報ONLINE") throw new Error(code+" "+String(r[idx("name")]||"")+"：data_basis が標準ルール外です");
-   if(!["verified","pending","verified_reference_only"].includes(verified)) throw new Error(code+" "+String(r[idx("name")]||"")+"：verification_status が未対応です");
+   if(!["verified","pending"].includes(verified)) throw new Error(code+" "+String(r[idx("name")]||"")+"：verification_status は verified / pending のみ対応です");
    const item={
     code,
     name:String(r[idx("name")]||"").trim(),
@@ -337,7 +341,8 @@ $("importBtn").onclick=async()=>{
     opPrev2:idx("op_prev2_oku")>=0?nOpt(r[idx("op_prev2_oku")]):null,
     source:"マネックス 銘柄スカウターライト＋会社開示",
     dataBasis:basis,
-    verificationStatus:verified
+    verificationStatus:verified,
+    opMarginMethod:idx("op_margin_method")>=0?String(r[idx("op_margin_method")]||"").trim():""
    };
    if(!item.companyValue&&item.mcap&&item.ret!=null)item.companyValue=item.mcap*(1+item.ret/100);
    item.ret=calcGap(item);
@@ -373,7 +378,7 @@ $("metricUpdateBtn").onclick=async()=>{
    const basis=String(r[idx("data_basis")]||"").trim();
    const verified=String(r[idx("verification_status")]||"").trim().toLowerCase();
    if(!/^銘柄スカウター＋会社開示/.test(basis)&&basis!=="四季報ONLINE") throw new Error(code+"：data_basis が標準ルール外です");
-   if(!["verified","pending","verified_reference_only"].includes(verified)) throw new Error(code+"：verification_status が未対応です");
+   if(!["verified","pending"].includes(verified)) throw new Error(code+"：verification_status は verified / pending のみ対応です");
    const cur={...D[p],dataBasis:basis,verificationStatus:verified};
    const setNum=(col,key)=>{if(idx(col)>=0&&String(r[idx(col)]??"").trim()!=="")cur[key]=nOpt(r[idx(col)])};
    setNum("current_price_yen","price"); setNum("market_cap_oku","mcap"); setNum("forecast_per","per"); setNum("pbr","pbr"); setNum("week_change_pct","weekChange"); setNum("weekly_turnover_oku","weeklyTurnover"); setNum("turnover_4w_ratio","turnover4wRatio");
