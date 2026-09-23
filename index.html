@@ -176,9 +176,6 @@ const INITIAL=[
 {code:"2914",name:"JT",sec:"食料品",ret:-36.9,mar:21.03,per:18.98,pbr:2.78,roe:12.99,nc:-8476,fit:"○"},
 {code:"6965",name:"浜松ホトニクス",sec:"電気機器",ret:-64.9,mar:10.73,per:37.63,pbr:2.05,roe:4.35,nc:150,fit:"○"}];
 let D=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_data")||"null");return Array.isArray(v)&&v.length?v:INITIAL.map(x=>({...x}))}catch(e){return INITIAL.map(x=>({...x}))}})();
-// v1.4 data migration: fix stale Bridgestone margin already stored in localStorage.
-D=D.map(x=>x.code==="5108"?{...x,mar:11.10,opMarginMethod:"actual_3y"}:x);
-localStorage.setItem("kabukurabeeru_data",JSON.stringify(D));
 const PRICE_20260918={"6432":7280,"9735":6436,"5108":3730,"5101":6825,"1801":12620,"1802":3083,"1803":2358,"1812":4979,"2914":6886,"6965":2246.5,"4063":5844};
 D=D.map(x=>{
  const mcap=Number(x.mcap||0), oldGap=Number(x.ret||0);
