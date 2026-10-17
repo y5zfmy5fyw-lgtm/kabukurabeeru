@@ -43,7 +43,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </head>
 <body>
 <header>
-<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.7</small></h1><div>比較して、見えてくる</div>
+<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.8</small></h1><div>比較して、見えてくる</div>
 <div class="tabs">
 <button class="on" data-p="list">一覧</button>
 <button data-p="compare">比較</button>
@@ -54,7 +54,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>iPad対応MVP v1.2</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標→週次資金動向の順で比較できます。</small><br><small><b>データ基準：マネックス 銘柄スカウターライト＋会社開示</b>。銘柄名から主要データ収集先へ移動できます。</small></div>
+<div class="card"><b>31社比較 v1.8</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標→週次資金動向の順で比較できます。</small><br><small><b>データ基準：マネックス 銘柄スカウターライト＋会社開示</b>。銘柄名から主要データ収集先へ移動できます。</small></div>
 
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
@@ -175,6 +175,10 @@ const INITIAL=[
 {code:"2914",name:"JT",sec:"食料品",ret:-36.9,mar:21.03,per:18.98,pbr:2.78,roe:12.99,nc:-8476,fit:"○"},
 {code:"6965",name:"浜松ホトニクス",sec:"電気機器",ret:-64.9,mar:10.73,per:37.63,pbr:2.05,roe:4.35,nc:150,fit:"○"}];
 let D=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_data")||"null");return Array.isArray(v)&&v.length?v:INITIAL.map(x=>({...x}))}catch(e){return INITIAL.map(x=>({...x}))}})();
+
+// v1.8: 既存データを維持して31銘柄を登録。未検証値は空欄。
+const EXTRA_STOCKS=[["9984","ソフトバンクグループ"],["6180","GMOメディア"],["8267","イオン"],["9509","北海道電力"],["1605","INPEX"],["9101","日本郵船"],["9104","商船三井"],["7011","三菱重工業"],["7013","IHI"],["7203","トヨタ自動車"],["8035","東京エレクトロン"],["6857","アドバンテスト"],["6920","レーザーテック"],["6976","太陽誘電"],["5803","フジクラ"],["285A","キオクシアHD"],["6098","リクルートHD"],["8058","三菱商事"],["8031","三井物産"],["8001","伊藤忠商事"],["7984","コクヨ"]];
+for(const [code,name] of EXTRA_STOCKS){if(!D.some(x=>x.code===code))D.push({code,name,sec:"未分類",fit:"○",verificationStatus:"pending",source:"未確認"});}
 const PRICE_20260918={"6432":7280,"9735":6436,"5108":3730,"5101":6825,"1801":12620,"1802":3083,"1803":2358,"1812":4979,"2914":6886,"6965":2246.5,"4063":5844};
 D=D.map(x=>{
  const mcap=Number(x.mcap||0), oldGap=Number(x.ret||0);
