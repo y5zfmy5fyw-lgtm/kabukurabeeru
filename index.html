@@ -43,7 +43,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </head>
 <body>
 <header>
-<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.9</small></h1><div>比較して、見えてくる</div>
+<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v2.0</small></h1><div>比較して、見えてくる</div>
 <div class="tabs">
 <button class="on" data-p="list">一覧</button>
 <button data-p="compare">比較</button>
@@ -54,7 +54,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>31社比較 v1.9</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標→週次資金動向の順で比較できます。</small><br><small><b>データ基準：マネックス 銘柄スカウターライト＋会社開示</b>。銘柄名から主要データ収集先へ移動できます。</small></div>
+<div class="card"><b>31社比較 v2.0</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標→週次資金動向の順で比較できます。</small><br><small><b>データ基準：マネックス 銘柄スカウターライト＋会社開示</b>。銘柄名から主要データ収集先へ移動できます。</small></div>
 
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
@@ -181,8 +181,8 @@ const EXTRA_STOCKS=[["9984","ソフトバンクグループ"],["6180","GMOメデ
 for(const [code,name] of EXTRA_STOCKS){if(!D.some(x=>x.code===code))D.push({code,name,sec:"未分類",fit:"○",verificationStatus:"pending",source:"未確認"});}
 const PRICE_20260918={"6432":7280,"9735":6436,"5108":3730,"5101":6825,"1801":12620,"1802":3083,"1803":2358,"1812":4979,"2914":6886,"6965":2246.5,"4063":5844};
 D=D.map(x=>{
- const mcap=Number(x.mcap||0), oldGap=Number(x.ret||0);
- const companyValue=Number(x.companyValue||x.company_value_oku||(mcap?mcap*(1+oldGap/100):0));
+ const mcap=Number(x.mcap||0);
+ const companyValue=Number(x.companyValue||x.company_value_oku||0);
  return {...x,mcap,companyValue,price:Number(x.price||PRICE_20260918[x.code]||0),updatedAt:x.updatedAt||"2026/9/18",source:x.source||"かぶみーる"};
 });
 function calcGap(x){const v=calcValue(x);return x.mcap>0&&v!=null?(v/x.mcap-1)*100:null}
@@ -355,7 +355,7 @@ $("importBtn").onclick=async()=>{
    // Legacy valuation figures are preserved for reference, not used as a calculated EV gap.
    item.ret=calcGap(item);
    const p=D.findIndex(x=>x.code===code);
-   if(p>=0){D[p]={...D[p],...item};updated++} else {D.push(item);added++}
+   if(p>=0){const old=D[p];const merged={...old};for(const [k,v] of Object.entries(item)){if(v!==null&&v!==undefined&&v!=="")merged[k]=v;}merged.ret=calcGap(merged);D[p]=merged;updated++} else {D.push(item);added++}
    const now=new Date(), stamp=now.toISOString(), label=stampLabel(now);
    if(!Array.isArray(HISTORY[code])) HISTORY[code]=[];
    HISTORY[code].push(snapshotItem(item,stamp,label));
