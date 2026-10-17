@@ -43,7 +43,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </head>
 <body>
 <header>
-<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.8</small></h1><div>比較して、見えてくる</div>
+<h1>かぶくらべーる <small id="appVersion" style="font-size:12px;opacity:.8">v1.9</small></h1><div>比較して、見えてくる</div>
 <div class="tabs">
 <button class="on" data-p="list">一覧</button>
 <button data-p="compare">比較</button>
@@ -54,7 +54,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </header>
 <main>
 <section id="list" class="page on">
-<div class="card"><b>31社比較 v1.8</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標→週次資金動向の順で比較できます。</small><br><small><b>データ基準：マネックス 銘柄スカウターライト＋会社開示</b>。銘柄名から主要データ収集先へ移動できます。</small></div>
+<div class="card"><b>31社比較 v1.9</b><br><small>銘柄列を固定し、一般指標→企業分析指標→独自指標→週次資金動向の順で比較できます。</small><br><small><b>データ基準：マネックス 銘柄スカウターライト＋会社開示</b>。銘柄名から主要データ収集先へ移動できます。</small></div>
 
 <div class="card filters">
 <div><label>検索</label><input id="q" placeholder="銘柄名・コード"></div>
@@ -73,7 +73,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <button class="btn" id="cmp">選択銘柄を比較</button>
 </div>
 <div class="card">
-<h3 style="margin-top:0">企業価値モデル適合度</h3>
+<h3 style="margin-top:0">企業価値モデル適合度</h3><p><small>v1.9の企業価値ギャップは（予想営業利益＋減価償却費＋のれん償却費）×EV/EBITDA倍率－有利子負債＋現預金を理論株主価値として計算。必要データ不足時は未算定です。倍率はCSVで指定し、仮定値として扱います。</small></p>
 <small>企業の稼ぐ力と財務状態から企業価値をみる計算モデルへの適合度です。</small>
 <div class="fithelp">
 <div class="fitcard"><b>○ 標準</b><small>稼ぐ力と財務状態で企業価値を捉えやすい企業。</small></div>
@@ -185,7 +185,12 @@ D=D.map(x=>{
  const companyValue=Number(x.companyValue||x.company_value_oku||(mcap?mcap*(1+oldGap/100):0));
  return {...x,mcap,companyValue,price:Number(x.price||PRICE_20260918[x.code]||0),updatedAt:x.updatedAt||"2026/9/18",source:x.source||"かぶみーる"};
 });
-function calcGap(x){return x.mcap>0&&x.companyValue>0?(x.companyValue/x.mcap-1)*100:null}
+function calcGap(x){const v=calcValue(x);return x.mcap>0&&v!=null?(v/x.mcap-1)*100:null}
+function calcValue(x){
+ const op=Number(x.opCurrent),dep=Number(x.depreciation),good=Number(x.goodwill||0),debt=Number(x.debt),cash=Number(x.cash),mult=Number(x.evMultiple);
+ if(x.opCurrent!=null&&x.depreciation!=null&&x.debt!=null&&x.cash!=null&&x.evMultiple!=null&&mult>0&&[op,dep,good,debt,cash].every(Number.isFinite))return (op+dep+good)*mult-debt+cash;
+ return null;
+}
 function fitText(v){return v==="△"?"△ 要補足":v==="×"?"× 別評価向き":"○ 標準"}
 D=D.map(x=>({...x,ret:calcGap(x)}));
 let HISTORY=(()=>{try{const v=JSON.parse(localStorage.getItem("kabukurabeeru_history")||"{}");return v&&typeof v==="object"?v:{}}catch(e){return {}}})();
@@ -335,6 +340,11 @@ $("importBtn").onclick=async()=>{
     salesPrev:idx("sales_prev_oku")>=0?nOpt(r[idx("sales_prev_oku")]):null,
     salesPrev2:idx("sales_prev2_oku")>=0?nOpt(r[idx("sales_prev2_oku")]):null,
     opCurrent:idx("op_current_forecast_oku")>=0?nOpt(r[idx("op_current_forecast_oku")]):null,
+    depreciation:idx("depreciation_oku")>=0?nOpt(r[idx("depreciation_oku")]):null,
+    goodwill:idx("goodwill_amortization_oku")>=0?nOpt(r[idx("goodwill_amortization_oku")]):null,
+    debt:idx("interest_bearing_debt_oku")>=0?nOpt(r[idx("interest_bearing_debt_oku")]):null,
+    cash:idx("cash_oku")>=0?nOpt(r[idx("cash_oku")]):null,
+    evMultiple:idx("ev_ebitda_multiple")>=0?nOpt(r[idx("ev_ebitda_multiple")]):null,
     opPrev:idx("op_prev_oku")>=0?nOpt(r[idx("op_prev_oku")]):null,
     opPrev2:idx("op_prev2_oku")>=0?nOpt(r[idx("op_prev2_oku")]):null,
     source:"マネックス 銘柄スカウターライト＋会社開示",
@@ -342,7 +352,7 @@ $("importBtn").onclick=async()=>{
     verificationStatus:verified,
     opMarginMethod:idx("op_margin_method")>=0?String(r[idx("op_margin_method")]||"").trim():""
    };
-   if(!item.companyValue&&item.mcap&&item.ret!=null)item.companyValue=item.mcap*(1+item.ret/100);
+   // Legacy valuation figures are preserved for reference, not used as a calculated EV gap.
    item.ret=calcGap(item);
    const p=D.findIndex(x=>x.code===code);
    if(p>=0){D[p]={...D[p],...item};updated++} else {D.push(item);added++}
@@ -386,6 +396,12 @@ $("metricUpdateBtn").onclick=async()=>{
    setNum("week_change_pct","weekChange");
    setNum("weekly_turnover_oku","weeklyTurnover");
    setNum("turnover_4w_ratio","turnover4wRatio");
+   setNum("op_current_forecast_oku","opCurrent");
+   setNum("depreciation_oku","depreciation");
+   setNum("goodwill_amortization_oku","goodwill");
+   setNum("interest_bearing_debt_oku","debt");
+   setNum("cash_oku","cash");
+   setNum("ev_ebitda_multiple","evMultiple");
    cur.ret=calcGap(cur);
    if(idx("market_updated_at")>=0&&String(r[idx("market_updated_at")]||"").trim())cur.marketUpdatedAt=String(r[idx("market_updated_at")]).trim();
    else if(idx("data_date")>=0&&String(r[idx("data_date")]||"").trim())cur.marketUpdatedAt=String(r[idx("data_date")]).trim();
