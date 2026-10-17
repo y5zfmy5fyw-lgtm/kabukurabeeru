@@ -64,7 +64,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <div><label>企業価値ギャップ</label><select id="retRange"><option value="">すべて</option><option value="ltm50">-50%未満</option><option value="m50_0">-50〜0%</option><option value="0_25">0〜25%</option><option value="25_50">25〜50%</option><option value="gte50">50%以上</option></select></div>
 <div><label>業種</label><select id="sec"><option value="">すべて</option></select></div>
 </div>
-<div class="card tablewrap"><table><thead><tr><th>選択</th><th>銘柄</th><th>業種</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>時価総額(億円)</th><th>現在株価</th><th>3年営業利益率</th><th>利益率トレンド</th><th>ネットキャッシュ(億円)</th><th>企業価値ギャップ</th><th>週間騰落率</th><th>週間売買代金(億円)</th><th>4週平均比</th><th>適合度</th><th>市場更新日</th><th>財務更新日</th></tr></thead><tbody id="body"></tbody></table></div>
+<div class="card tablewrap"><table><thead><tr><th>選択</th><th>銘柄</th><th>業種</th><th>予想PER</th><th>PBR</th><th>ROE</th><th>時価総額(億円)</th><th>現在株価</th><th>3年営業利益率</th><th>利益率トレンド</th><th>ネットキャッシュ(億円)</th><th>企業価値ギャップ</th><th>週間騰落率</th><th>週間売買代金(億円)</th><th>適合度</th><th>市場更新日</th><th>財務更新日</th></tr></thead><tbody id="body"></tbody></table></div>
 <div class="card screeningBar">
 <span class="screeningStat">登録 <b id="allc">10</b></span>
 <span class="screeningStat">抽出 <b id="fc">10</b></span>
@@ -88,7 +88,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <div class="comparegrid">
 <div class="card"><h3>主要指標</h3><div id="ctable"></div></div>
 <div class="card"><h3>比較グラフ</h3>
-<label>指標</label><select id="metric"><option value="per">予想PER</option><option value="pbr">PBR</option><option value="roe">ROE</option><option value="mcap">時価総額</option><option value="mar">3年営業利益率</option><option value="nc">ネットキャッシュ</option><option value="ret">企業価値ギャップ</option><option value="weekChange">週間騰落率</option><option value="weeklyTurnover">週間売買代金</option><option value="turnover4wRatio">4週平均比</option></select>
+<label>指標</label><select id="metric"><option value="per">予想PER</option><option value="pbr">PBR</option><option value="roe">ROE</option><option value="mcap">時価総額</option><option value="mar">3年営業利益率</option><option value="nc">ネットキャッシュ</option><option value="ret">企業価値ギャップ</option><option value="weekChange">週間騰落率</option><option value="weeklyTurnover">週間売買代金</option></select>
 <div id="bars" class="bars"></div>
 </div>
 </div>
@@ -109,7 +109,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <option value="ret">企業価値ギャップ</option>
 <option value="weekChange">週間騰落率</option>
 <option value="weeklyTurnover">週間売買代金</option>
-<option value="turnover4wRatio">4週平均比</option>
+
 </select></div>
 </div>
 </div>
@@ -126,7 +126,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 <section id="update" class="page">
 <div class="card">
   <h2 style="margin-top:0">毎週金曜・7項目更新</h2>
-  <p>既存銘柄の <b>現在株価・時価総額・PBR・予想PER・週間騰落率・週間売買代金・4週平均売買代金比</b> を更新します。時価総額更新後、企業価値ギャップも自動再計算します。</p>
+  <p>既存銘柄の <b>現在株価・時価総額・PBR・予想PER・週間騰落率・週間売買代金</b> を更新します。時価総額更新後、企業価値ギャップも自動再計算します。</p>
   <div class="importbox">
     <b>週次更新CSVを選択</b>
     <input id="metricFile" type="file" accept=".csv,text/csv">
@@ -136,7 +136,7 @@ small{color:var(--m)}.btn{border:0;border-radius:10px;padding:11px 14px;backgrou
 </div>
 <div class="card">
   <h3>週次更新CSVの列</h3>
-  <div class="codebox">code, market_updated_at, current_price_yen, market_cap_oku, forecast_per, pbr, week_change_pct, weekly_turnover_oku, turnover_4w_ratio, source_main, data_basis, verification_status</div>
+  <div class="codebox">code, market_updated_at, current_price_yen, market_cap_oku, forecast_per, pbr, week_change_pct, weekly_turnover_oku, source_main, data_basis, verification_status</div>
   <p><small>code以外の数値列は空欄なら現在値を維持します。ROE・3年営業利益率・ネットキャッシュ・企業価値ギャップの基礎財務は決算後更新で扱います。</small></p>
 </div>
 </section>
@@ -434,12 +434,12 @@ $("resetHistory").onclick=()=>{
 };
 
 function renderCompare(){const A=D.filter(x=>selected.has(x.code)).map(x=>({...x,ret:calcGap(x)}));$("chips").innerHTML=A.map(x=>"<span class='chip'>"+x.name+"</span>").join("");$("cmpnote").style.display=A.length>=2?"none":"block";if(A.length<2){$("ctable").innerHTML="";$("bars").innerHTML="";return}
-const metrics=[["予想PER","per","倍"],["PBR","pbr","倍"],["ROE","roe","%"],["時価総額","mcap","億円"],["現在株価","price","円"],["3年営業利益率","mar","%"],["ネットキャッシュ","nc","億円"],["企業価値ギャップ","ret","%"],["週間騰落率","weekChange","%"],["週間売買代金","weeklyTurnover","億円"],["4週平均比","turnover4wRatio","倍"]];
+const metrics=[["予想PER","per","倍"],["PBR","pbr","倍"],["ROE","roe","%"],["時価総額","mcap","億円"],["現在株価","price","円"],["3年営業利益率","mar","%"],["ネットキャッシュ","nc","億円"],["企業価値ギャップ","ret","%"],["週間騰落率","weekChange","%"],["週間売買代金","weeklyTurnover","億円"]];
 $("ctable").innerHTML=metrics.map(m=>"<div class='metricrow'><div>"+m[0]+"</div>"+A.map(x=>"<div>"+(x[m[1]]==null?"—":m[2]==="%"?Number(x[m[1]]).toFixed(1)+"%":m[2]==="円"?Math.round(Number(x[m[1]])).toLocaleString()+"円":Number(x[m[1]]).toLocaleString()+m[2])+"</div>").join("")+"</div>").join("");
 const key=$("metric").value, nums=A.map(x=>Number(x[key])).filter(Number.isFinite), max=Math.max(...nums.map(v=>Math.abs(v)),1);$("bars").innerHTML=A.map(x=>{const v=x[key];if(v==null||!Number.isFinite(Number(v)))return "<div class='barcol'><div>—</div><div class='barlabel'>"+x.name+"</div></div>";return "<div class='barcol'><div>"+(key==="ret"||key==="mar"||key==="roe"?Number(v).toFixed(1)+"%":Number(v).toLocaleString())+"</div><div class='vbar' style='height:"+Math.max(4,Math.abs(Number(v))/max*210)+"px;opacity:"+(Number(v)<0?.45:1)+"'></div><div class='barlabel'>"+x.name+"</div></div>"}).join("")}
 $("trendSel").onchange=renderTrend;
 $("trendMetric").onchange=renderTrend;
-function metricDef(k){return {per:["予想PER","倍"],pbr:["PBR","倍"],roe:["ROE","%"],mcap:["時価総額","億円"],mar:["3年営業利益率","%"],nc:["ネットキャッシュ","億円"],ret:["企業価値ギャップ","%"],weekChange:["週間騰落率","%"],weeklyTurnover:["週間売買代金","億円"],turnover4wRatio:["4週平均比","倍"]}[k]}
+function metricDef(k){return {per:["予想PER","倍"],pbr:["PBR","倍"],roe:["ROE","%"],mcap:["時価総額","億円"],mar:["3年営業利益率","%"],nc:["ネットキャッシュ","億円"],ret:["企業価値ギャップ","%"],weekChange:["週間騰落率","%"],weeklyTurnover:["週間売買代金","億円"]}[k]}
 function fmtMetric(k,v){if(v==null||!Number.isFinite(Number(v)))return "—";if(k==="nc"||k==="mcap"||k==="weeklyTurnover")return Number(v).toLocaleString()+"億円";if(k==="per"||k==="pbr"||k==="turnover4wRatio")return Number(v).toFixed(2)+"倍";return Number(v).toFixed(1)+"%"}
 function trendSVG(points,key){
  const W=760,H=300,L=54,R=20,T=24,B=44, usable=points.filter(p=>p[key]!=null&&Number.isFinite(Number(p[key]))), vals=usable.map(p=>Number(p[key]));
